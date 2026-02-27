@@ -6,67 +6,104 @@
 
 @layer base {
   :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --border: rgba(0, 0, 0, 0.06);
+    --border-hover: rgba(99, 102, 241, 0.2);
+    --text: #1e293b;
+    --muted: rgba(100, 116, 139, 0.5);
+    --accent: #6366f1;
+    --accent2: #3b82f6;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --input-bg: rgba(0, 0, 0, 0.02);
+  }
+
+  .dark {
     --bg: #070d1a;
     --surface: #0d1526;
     --surface2: #111d33;
-    --border: rgba(255,255,255,0.07);
-    --border-hover: rgba(99,102,241,0.4);
-    --text: #e2e8f0;
-    --muted: rgba(148,163,184,0.6);
-    --accent: #6366f1;
-    --accent2: #3b82f6;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(99, 102, 241, 0.4);
+    --text: #f8fafc;
+    --muted: rgba(148, 163, 184, 0.6);
+    --glass-bg: rgba(13, 21, 38, 0.7);
+    --input-bg: rgba(255, 255, 255, 0.04);
   }
 
-  * { font-family: 'Inter', system-ui, sans-serif; }
+  * {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
 
   body {
     background: var(--bg);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s, color 0.3s;
   }
 
   /* Custom scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 99px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 99px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.5);
+  }
 }
 
 @layer utilities {
+
   /* Glass card */
   .glass {
-    background: rgba(13, 21, 38, 0.7);
+    background: var(--glass-bg);
     border: 1px solid var(--border);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    transition: background-color 0.3s, border-color 0.3s;
   }
 
   .glass-hover {
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: all 0.2s;
   }
+
   .glass-hover:hover {
     border-color: var(--border-hover);
-    box-shadow: 0 0 0 1px rgba(99,102,241,0.15), 0 8px 32px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
   }
 
   /* Input field */
   .dark-input {
     width: 100%;
     padding: 0.875rem 1.25rem;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--input-bg);
+    border: 1px solid var(--border);
     border-radius: 0.875rem;
-    color: #e2e8f0;
+    color: var(--text);
     font-size: 0.875rem;
     font-weight: 500;
     transition: all 0.2s;
     outline: none;
   }
-  .dark-input::placeholder { color: rgba(148,163,184,0.4); }
+
+  .dark-input::placeholder {
+    color: var(--muted);
+  }
+
   .dark-input:focus {
-    border-color: rgba(99,102,241,0.5);
-    background: rgba(99,102,241,0.06);
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    border-color: rgba(99, 102, 241, 0.5);
+    background: rgba(99, 102, 241, 0.06);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
   }
 
   /* Label */
@@ -75,7 +112,7 @@
     font-weight: 800;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: rgba(148,163,184,0.55);
+    color: var(--muted);
     display: block;
     margin-bottom: 0.5rem;
   }
@@ -92,9 +129,32 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
-  .badge-done { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
-  .badge-doing { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
-  .badge-pending { background: rgba(148,163,184,0.08); color: rgba(148,163,184,0.6); border: 1px solid rgba(148,163,184,0.12); }
+
+  .badge-done {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+
+  .dark .badge-done {
+    color: #34d399;
+  }
+
+  .badge-doing {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+
+  .dark .badge-doing {
+    color: #fbbf24;
+  }
+
+  .badge-pending {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
 
   /* Primary button */
   .btn-primary {
@@ -112,12 +172,25 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    box-shadow: 0 4px 24px rgba(99,102,241,0.3);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
     letter-spacing: 0.02em;
   }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(99,102,241,0.4); }
-  .btn-primary:active { transform: scale(0.98); }
-  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
 
   /* Section header */
   .section-label {
@@ -125,27 +198,29 @@
     font-weight: 900;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(148,163,184,0.4);
+    color: var(--muted);
   }
 
   /* Grid dot bg */
   .dot-bg {
-    background-image: radial-gradient(rgba(99,102,241,0.12) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px);
     background-size: 28px 28px;
   }
 
   /* Glow pulse */
   @keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.2); }
-    50% { box-shadow: 0 0 40px rgba(99,102,241,0.5); }
-  }
-  .glow-pulse { animation: glow-pulse 2.5s ease-in-out infinite; }
 
-  /* Gradient text */
-  .gradient-text {
-    background: linear-gradient(135deg, #a5b4fc 0%, #60a5fa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    0%,
+    100% {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+    }
+
+    50% {
+      box-shadow: 0 0 35px rgba(99, 102, 241, 0.3);
+    }
+  }
+
+  .glow-pulse {
+    animation: glow-pulse 2.5s ease-in-out infinite;
   }
 }

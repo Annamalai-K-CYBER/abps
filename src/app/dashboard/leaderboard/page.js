@@ -55,11 +55,11 @@ export default function LeaderboardPage() {
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
               <Trophy className="text-yellow-500" size={36} />
               Leaderboard
             </h1>
-            <p className="text-slate-500 text-sm mt-1 font-medium italic">
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium italic">
               Top CSBS contributors ranked by Sync Points & Contributions
             </p>
           </div>
@@ -179,7 +179,7 @@ export default function LeaderboardPage() {
 
                    {/* Info */}
                    <div className="flex-1 min-w-0">
-                     <p className="font-black text-white truncate text-base">{user.name || user.username}</p>
+                     <p className="font-black text-slate-900 dark:text-white truncate text-base">{user.name || user.username}</p>
                      <div className="flex items-center gap-3 mt-1">
                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                          @{user.username}

@@ -114,8 +114,8 @@ export default function WorkPage() {
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-white">Work Tracker</h1>
-            <p className="text-slate-500 text-sm mt-1">Track all assignments and deadlines</p>
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white">Work Tracker</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Track all assignments and deadlines</p>
           </div>
           <div className="flex gap-3">
             <button onClick={fetchWorks} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl glass glass-hover text-slate-400 text-sm font-bold">
@@ -156,8 +156,8 @@ export default function WorkPage() {
                   <Plus size={20} className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="font-black text-white text-lg">New Assignment</p>
-                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Post to all students</p>
+                  <p className="font-black text-slate-900 dark:text-white text-lg">New Assignment</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Post to all students</p>
                 </div>
               </div>
 
@@ -226,8 +226,8 @@ export default function WorkPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <span className={`badge ${cfg.pill} mb-2`}>{cfg.icon} {cfg.label}</span>
-                      <h3 className="font-black text-white leading-tight">{w.subject}</h3>
-                      <p className="text-slate-400 text-sm mt-1 leading-relaxed">{w.work}</p>
+                      <h3 className="font-black text-slate-900 dark:text-white leading-tight">{w.subject}</h3>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 leading-relaxed">{w.work}</p>
                     </div>
                     {isAdmin && (
                       <button onClick={() => handleDelete(w._id)} className="p-2 rounded-xl text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
@@ -237,7 +237,7 @@ export default function WorkPage() {
                   </div>
 
                   {/* Meta */}
-                  <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                  <div className="flex items-center justify-between pt-3 border-t border-black/5 dark:border-white/5">
                     <div className="flex items-center gap-2">
                       <Clock size={12} className="text-slate-600" />
                       <span className="text-slate-500 text-xs font-medium">{formatDate(w.deadline)}</span>

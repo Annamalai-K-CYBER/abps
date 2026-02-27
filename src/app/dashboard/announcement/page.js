@@ -98,11 +98,11 @@ export default function AnnouncementsPage() {
       <div className="max-w-5xl mx-auto mb-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-4">
-               <Megaphone className="text-indigo-400" size={32} />
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-4">
+               <Megaphone className="text-indigo-600 dark:text-indigo-400" size={32} />
                Announcements
             </h1>
-            <p className="text-slate-500 mt-2 font-medium">Your source for all official updates and events.</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Your source for all official updates and events.</p>
           </div>
           
           {isAdmin && (
@@ -132,7 +132,7 @@ export default function AnnouncementsPage() {
             >
               <form
                 onSubmit={handleAdd}
-                className="glass rounded-[2.5rem] p-8 ring-1 ring-white/10 flex flex-col gap-6"
+                className="glass rounded-[2.5rem] p-8 ring-1 ring-black/5 dark:ring-white/10 flex flex-col gap-6 shadow-xl"
               >
                 <div className="flex items-center gap-3 text-indigo-600 font-black uppercase tracking-widest text-xs">
                    <Sparkles size={16} />
@@ -235,7 +235,7 @@ export default function AnnouncementsPage() {
                     className={`w-full flex items-center justify-between p-6 rounded-3xl transition-all duration-300 ${
                        isOpen 
                         ? `bg-${cat.color}-600 text-white shadow-xl shadow-${cat.color}-500/25` 
-                        : "glass glass-hover text-white"
+                        : "glass glass-hover text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/5"
                     }`}
                   >
                     <div className="flex items-center gap-4">
@@ -282,7 +282,7 @@ export default function AnnouncementsPage() {
                                 </div>
                                 <div className="p-8 flex flex-col flex-grow">
                                   <div className="flex justify-between items-start mb-4">
-                                     <h3 className="font-black text-white text-xl leading-tight">
+                                     <h3 className="font-black text-slate-900 dark:text-white text-xl leading-tight">
                                       {a.topic}
                                     </h3>
                                     {isAdmin && (
@@ -297,8 +297,8 @@ export default function AnnouncementsPage() {
                                   <p className="text-slate-500 text-sm leading-relaxed whitespace-pre-wrap flex-grow">
                                     {a.details}
                                   </p>
-                                  <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-500 italic">Official Update</span>
+                                  <div className="mt-8 pt-6 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+                                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-500 dark:text-slate-400 italic">Official Update</span>
                                       <div className={`w-2 h-2 rounded-full bg-indigo-500 animate-pulse`} />
                                   </div>
                                 </div>

@@ -25,7 +25,7 @@ function StatChip({ icon: Icon, label, value, color }) {
         <Icon size={14} className="opacity-60" />
         <span className="section-label">{label}</span>
       </div>
-      <p className="text-2xl font-black text-white">{value}</p>
+      <p className="text-2xl font-black text-slate-900 dark:text-white">{value}</p>
     </div>
   );
 }
@@ -45,7 +45,7 @@ function InputField({ label, type = "text", value, onChange, placeholder, icon: 
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           className={`dark-input h-12 ${Icon ? "pl-11" : ""} ${right ? "pr-12" : ""} 
-            ${focused ? "ring-2 ring-indigo-500/30 border-indigo-500/50" : "border-white/5"}`} 
+            ${focused ? "ring-2 ring-indigo-500/30 border-indigo-500/50" : "border-black/5 dark:border-white/5"}`} 
         />
         {right && <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">{right}</div>}
       </div>
@@ -156,10 +156,9 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Info */}
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl font-black text-white">{user?.username || "Loading..."}</h1>
-              <p className="text-slate-400 text-sm mt-1">{user?.email}</p>
+              <h1 className="text-2xl font-black text-slate-900 dark:text-white">{user?.username || "Loading..."}</h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{user?.email}</p>
               {user?.email1 && (
                 <div className="inline-flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                   <Shield size={11} className="text-emerald-400" />
@@ -183,25 +182,34 @@ export default function ProfilePage() {
         {/* ── Action Buttons ── */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <p className="section-label mb-3 px-1">Account Settings</p>
-          <div className="glass rounded-[2rem] p-2 space-y-1">
+            <section className="glass rounded-[2rem] p-8 ring-1 ring-black/5 dark:ring-white/10 shadow-xl overflow-hidden relative">
+            <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                  <User size={20} className="text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Personal Identity</h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Manage your public profile</p>
+                </div>
+              </div>
             {[
               !user?.email1 && { id: "addEmail", icon: Mail, label: "Add Secondary Email", sub: "Required for password recovery", color: "text-emerald-400" },
               user?.email1 && { id: "changeEmail", icon: Edit3, label: "Change Secondary Email", sub: user?.email1, color: "text-amber-400" },
               { id: "changePwd", icon: Lock, label: "Change Password", sub: "Update your login password", color: "text-indigo-400" },
             ].filter(Boolean).map(item => (
               <button key={item.id} onClick={() => setPanel(panel === item.id ? null : item.id)}
-                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all hover:bg-white/5 text-left ${panel === item.id ? "bg-white/5" : ""}`}>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${panel === item.id ? "bg-indigo-500/20" : "bg-white/5"}`}>
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all hover:bg-white/5 dark:hover:bg-white/5 text-left ${panel === item.id ? "bg-white/5 dark:bg-white/5" : ""}`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${panel === item.id ? "bg-indigo-500/20" : "bg-white/5 dark:bg-white/5"}`}>
                   <item.icon size={16} className={item.color} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-white text-sm">{item.label}</p>
-                  <p className="text-xs text-slate-500 truncate">{item.sub}</p>
+                  <p className="font-bold text-slate-900 dark:text-white text-sm">{item.label}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{item.sub}</p>
                 </div>
-                <div className={`w-2 h-2 rounded-full transition-colors ${panel === item.id ? "bg-indigo-400" : "bg-white/10"}`} />
+                <div className={`w-2 h-2 rounded-full transition-colors ${panel === item.id ? "bg-indigo-400" : "bg-white/10 dark:bg-white/10"}`} />
               </button>
             ))}
-          </div>
+          </section>
         </motion.div>
 
         {/* ── Panels ── */}
@@ -210,7 +218,7 @@ export default function ProfilePage() {
             <motion.div key="addEmail" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden">
               <form onSubmit={handleAddEmail} className="glass rounded-[2rem] p-7 space-y-5">
-                <p className="font-black text-white">Add Secondary Email</p>
+                <p className="font-black text-slate-900 dark:text-white">Add Secondary Email</p>
                 <InputField icon={Mail} type="email" value={email1} onChange={e => setEmail1(e.target.value)} placeholder="recovery@email.com" />
                 <button type="submit" disabled={loading} className="btn-primary">{loading ? "Saving..." : "Save Email"}</button>
               </form>
@@ -220,7 +228,7 @@ export default function ProfilePage() {
             <motion.div key="changeEmail" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden">
               <form onSubmit={handleChangeEmail} className="glass rounded-[2rem] p-7 space-y-5">
-                <p className="font-black text-white">Change Secondary Email</p>
+                <p className="font-black text-slate-900 dark:text-white">Change Secondary Email</p>
                 <InputField icon={Mail} type="email" value={newEmail1} onChange={e => setNewEmail1(e.target.value)} placeholder="new@email.com" />
                 <button type="submit" disabled={loading} className="btn-primary">{loading ? "Saving..." : "Update Email"}</button>
               </form>
@@ -230,7 +238,7 @@ export default function ProfilePage() {
             <motion.div key="changePwd" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden">
               <form onSubmit={handlePasswordChange} className="glass rounded-[2rem] p-7 space-y-5">
-                <p className="font-black text-white">Change Password</p>
+                <p className="font-black text-slate-900 dark:text-white">Change Password</p>
                 <InputField icon={KeyRound} type={showCur ? "text" : "password"} label="Current Password" value={form.currentPassword}
                   onChange={e => setForm({ ...form, currentPassword: e.target.value })} placeholder="Current password"
                   right={<button type="button" onClick={() => setShowCur(!showCur)} className="text-slate-500 hover:text-slate-300 p-1">{showCur ? <EyeOff size={14} /> : <Eye size={14} />}</button>} />

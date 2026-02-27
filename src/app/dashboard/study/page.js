@@ -72,8 +72,8 @@ export default function StudyPage() {
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-white">Study Progress</h1>
-            <p className="text-slate-500 text-sm mt-1">Track topics covered per subject</p>
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white">Study Progress</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Track topics covered per subject</p>
           </div>
           <div className="flex gap-3 flex-wrap">
             <button onClick={() => setShowTimetable(!showTimetable)}
@@ -97,7 +97,7 @@ export default function StudyPage() {
             <motion.div key="tt" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
               className="glass rounded-[2rem] overflow-hidden">
               <div className="px-6 py-4 border-b border-white/5">
-                <p className="font-black text-white">🗓️ Weekly Timetable</p>
+                <p className="font-black text-slate-900 dark:text-white">🗓️ Weekly Timetable</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-center">
@@ -139,8 +139,8 @@ export default function StudyPage() {
                   <Plus size={20} className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="font-black text-white text-lg">Log New Topic</p>
-                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Update class progress</p>
+                  <p className="font-black text-slate-900 dark:text-white text-lg">Log New Topic</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Update class progress</p>
                 </div>
               </div>
 
@@ -179,7 +179,7 @@ export default function StudyPage() {
                     <BookOpen size={14} className="text-indigo-400" />
                     <span className="badge badge-pending text-[10px]">{subj.topics.length} topics</span>
                   </div>
-                  <h3 className="font-black text-white text-sm leading-snug">{subj.name}</h3>
+                  <h3 className="font-black text-slate-900 dark:text-white text-sm leading-snug">{subj.name}</h3>
                   <p className="text-slate-400 text-xs mt-1 font-medium">👨‍🏫 {subj.staff}</p>
                 </div>
                 {open === i ? <ChevronUp size={16} className="text-slate-500 shrink-0 mt-1" /> : <ChevronDown size={16} className="text-slate-500 shrink-0 mt-1" />}
@@ -188,11 +188,11 @@ export default function StudyPage() {
               <AnimatePresence>
                 {open === i && (
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden border-t border-white/5">
+                    className="overflow-hidden border-t border-black/5 dark:border-white/5">
                     <div className="p-4 space-y-2 max-h-52 overflow-y-auto">
                       {subj.topics.length > 0 ? subj.topics.map(t => (
-                        <div key={t._id} className="flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-white/3 hover:bg-white/5 transition-colors">
-                          <span className="text-slate-300 text-xs font-medium">📌 {t.topic}</span>
+                        <div key={t._id} className="flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+                          <span className="text-slate-800 dark:text-slate-300 text-xs font-medium">📌 {t.topic}</span>
                           {isAdmin && (
                             <button onClick={() => handleDelete(t._id)} className="text-slate-600 hover:text-red-400 transition-colors shrink-0">
                               <Trash2 size={12} />

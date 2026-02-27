@@ -79,8 +79,8 @@ export default function MaterialPage() {
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-white">Study Materials</h1>
-            <p className="text-slate-500 text-sm mt-1">All resources organized by subject</p>
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white">Study Materials</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">All resources organized by subject</p>
           </div>
           <div className="flex gap-3">
             <button onClick={fetchMaterials} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl glass glass-hover text-slate-400 text-sm font-bold">
@@ -105,8 +105,8 @@ export default function MaterialPage() {
                   <Upload size={20} className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="font-black text-white text-lg">New Resource</p>
-                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Help others & earn points</p>
+                  <p className="font-black text-slate-900 dark:text-white text-lg">New Resource</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Help others & earn points</p>
                 </div>
               </div>
 
@@ -168,8 +168,8 @@ export default function MaterialPage() {
                       <FolderOpen size={16} className="text-indigo-400" />
                     </div>
                     <div className="text-left">
-                      <p className="font-black text-white">{subject}</p>
-                      <p className="text-slate-500 text-xs">{mats.length} file{mats.length !== 1 ? "s" : ""}</p>
+                      <p className="font-black text-slate-900 dark:text-white">{subject}</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-xs">{mats.length} file{mats.length !== 1 ? "s" : ""}</p>
                     </div>
                   </div>
                   {openSubject === subject ? <ChevronUp size={18} className="text-slate-500" /> : <ChevronDown size={18} className="text-slate-500" />}
@@ -194,9 +194,9 @@ export default function MaterialPage() {
                               )}
                             </div>
                             <div>
-                              <p className="font-bold text-white text-sm leading-snug line-clamp-2">{mat.matname}</p>
-                              <p className="text-slate-400 text-xs mt-1 font-medium italic">by {mat.name || "Unknown"}</p>
-                              {mat.uploadDate && <p className="text-slate-500 text-[10px] mt-0.5">{new Date(mat.uploadDate).toLocaleDateString()}</p>}
+                              <p className="font-bold text-slate-900 dark:text-white text-sm leading-snug line-clamp-2">{mat.matname}</p>
+                              <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 font-medium italic">by {mat.name || "Unknown"}</p>
+                              {mat.uploadDate && <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-0.5">{new Date(mat.uploadDate).toLocaleDateString()}</p>}
                             </div>
                             <button onClick={() => mat.link && window.open(mat.link.startsWith("http") ? mat.link : `https://${mat.link}`, "_blank")}
                               className="w-full py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold hover:bg-indigo-500/20 transition-colors flex items-center justify-center gap-2">

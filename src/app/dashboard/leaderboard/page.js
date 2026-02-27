@@ -55,12 +55,12 @@ export default function LeaderboardPage() {
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-              <Trophy className="text-yellow-500" size={36} />
+            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight flex items-center gap-4">
+              <Trophy className="text-yellow-500" size={42} />
               Leaderboard
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium italic">
-              Top CSBS contributors ranked by Sync Points & Contributions
+            <p className="text-slate-500 text-sm mt-3 font-medium italic max-w-md">
+              The elite contributors of CSBS. Ranked by Sync Points and persistent scholarly engagement.
             </p>
           </div>
         </div>
@@ -72,18 +72,18 @@ export default function LeaderboardPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-6 grid grid-cols-2 gap-4 max-w-sm"
           >
-            <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl p-4 border border-indigo-100 dark:border-indigo-800">
-              <p className="text-[10px] uppercase font-black tracking-widest text-indigo-500 mb-1">My Sync Points</p>
+            <div className="bg-indigo-500/5 rounded-2xl p-5 border border-indigo-500/10">
+              <p className="text-[10px] uppercase font-black tracking-widest text-indigo-500 mb-2 opacity-60">My Sync Points</p>
               <div className="flex items-center gap-2">
-                <Zap size={18} className="text-indigo-600 dark:text-indigo-400" />
-                <p className="text-2xl font-black text-indigo-700 dark:text-indigo-300">{myStats.points}</p>
+                <Zap size={20} className="text-indigo-400" />
+                <p className="text-2xl font-black text-indigo-300">{myStats.points}</p>
               </div>
             </div>
-            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-4 border border-orange-100 dark:border-orange-800">
-              <p className="text-[10px] uppercase font-black tracking-widest text-orange-500 mb-1">My Streak</p>
+            <div className="bg-orange-500/5 rounded-2xl p-5 border border-orange-500/10">
+              <p className="text-[10px] uppercase font-black tracking-widest text-orange-500 mb-2 opacity-60">My Streak</p>
               <div className="flex items-center gap-2">
-                <Flame size={18} className="text-orange-600 dark:text-orange-400" />
-                <p className="text-2xl font-black text-orange-700 dark:text-orange-300">{myStats.streak} 🔥</p>
+                <Flame size={20} className="text-orange-400" />
+                <p className="text-2xl font-black text-orange-400">{myStats.streak} 🔥</p>
               </div>
             </div>
           </motion.div>
@@ -154,12 +154,12 @@ export default function LeaderboardPage() {
                   transition={{ delay: i * 0.04 }}
                   className={`flex items-center gap-4 p-5 rounded-2xl border transition-all ${
                     i === 0
-                      ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800/50 shadow-md shadow-yellow-100 dark:shadow-yellow-900/20"
+                      ? "bg-yellow-500/5 border-yellow-500/20 shadow-lg shadow-yellow-500/5"
                       : i === 1
-                      ? "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700"
+                      ? "bg-slate-500/5 border-slate-500/20"
                       : i === 2
-                      ? "bg-orange-50 dark:bg-orange-900/10 border-orange-100 dark:border-orange-800/30"
-                      : "bg-white dark:bg-slate-800/40 border-slate-100 dark:border-slate-700/50"
+                      ? "bg-orange-500/5 border-orange-500/20"
+                      : "bg-white/3 border-white/5"
                   }`}
                 >
                   {/* Rank badge */}

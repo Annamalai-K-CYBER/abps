@@ -140,44 +140,47 @@ export default function AnnouncementsPage() {
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Topic</label>
+                  <div className="space-y-2.5">
+                    <label className="field-label">Topic</label>
                     <input
                       type="text"
                       placeholder="Give it a catchy title"
                       value={form.topic}
                       onChange={(e) => setForm({ ...form, topic: e.target.value })}
-                      className="dark-input h-12"
+                      className="advanced-input h-14"
                     />
                   </div>
                   
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Category</label>
-                    <select
-                      value={form.category}
-                      onChange={(e) => setForm({ ...form, category: e.target.value })}
-                      className="dark-input h-12 font-bold appearance-none cursor-pointer"
-                    >
-                      {categories.map((c) => (
-                        <option key={c.name} value={c.name}>{c.name}</option>
-                      ))}
-                    </select>
+                  <div className="space-y-2.5">
+                    <label className="field-label">Category</label>
+                    <div className="relative">
+                      <select
+                        value={form.category}
+                        onChange={(e) => setForm({ ...form, category: e.target.value })}
+                        className="advanced-input h-14 font-black appearance-none cursor-pointer pr-12"
+                      >
+                        {categories.map((c) => (
+                          <option key={c.name} value={c.name} className="bg-slate-900 text-white">{c.name}</option>
+                        ))}
+                      </select>
+                      <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Details</label>
+                <div className="space-y-2.5">
+                  <label className="field-label">Details</label>
                   <textarea
                     placeholder="Briefly describe the announcement..."
-                    rows={4}
+                    rows={5}
                     value={form.details}
                     onChange={(e) => setForm({ ...form, details: e.target.value })}
-                    className="dark-input resize-none"
+                    className="advanced-input resize-none"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Feature Image</label>
+                <div className="space-y-2.5">
+                  <label className="field-label">Feature Image</label>
                   <div className="relative group">
                     <input
                       type="file"
@@ -188,10 +191,10 @@ export default function AnnouncementsPage() {
                     />
                     <label 
                       htmlFor="announcement-image"
-                      className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-dashed border-white/10 hover:border-indigo-500 hover:bg-indigo-500/5 transition-all cursor-pointer text-slate-500 hover:text-indigo-400 group-hover:shadow-lg"
+                      className="flex items-center justify-center gap-3 p-5 rounded-[1.25rem] border-2 border-dashed border-white/5 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all cursor-pointer text-slate-500 hover:text-indigo-400 group-hover:shadow-xl group-hover:shadow-black/20"
                     >
-                      <ImageIcon size={20} />
-                      <span className="font-bold text-sm">{form.image ? form.image.name : "Choose an image file"}</span>
+                      <ImageIcon size={22} />
+                      <span className="font-bold text-sm tracking-tight">{form.image ? form.image.name : "Select feature image..."}</span>
                     </label>
                   </div>
                 </div>

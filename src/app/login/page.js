@@ -8,11 +8,22 @@ const STEP = { LOGIN: "login", FORGOT: "forgot", OTP: "otp", RESET: "reset", SUC
 
 // ─── Reusable Input ───
 function Field({ label, icon: Icon, type = "text", value, onChange, placeholder, autoComplete, required, rightSlot }) {
+  const [focused, setFocused] = useState(false);
   return (
-    <div className="space-y-2">
-      {label && <label className="text-[11px] font-black uppercase tracking-[3px] text-indigo-300/80 block">{label}</label>}
-      <div className="relative">
-        {Icon && <Icon size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400/70 pointer-events-none" />}
+    <div className="space-y-2.5">
+      {label && (
+        <label className="text-[10px] font-black uppercase tracking-[3px] text-slate-500 block ml-1">
+          {label}
+        </label>
+      )}
+      <div className={`relative transition-all duration-300 ${focused ? "scale-[1.02]" : ""}`}>
+        {Icon && (
+          <Icon 
+            size={16} 
+            className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 pointer-events-none
+              ${focused ? "text-indigo-400" : "text-slate-500/60"}`} 
+          />
+        )}
         <input
           type={type}
           value={value}
@@ -20,12 +31,11 @@ function Field({ label, icon: Icon, type = "text", value, onChange, placeholder,
           placeholder={placeholder}
           autoComplete={autoComplete}
           required={required}
-          className={`w-full py-4 rounded-2xl bg-white/8 border border-white/12 text-white placeholder-white/25 text-sm font-medium
-            focus:outline-none focus:border-indigo-400/60 focus:bg-white/12 focus:ring-0
-            transition-all duration-200 backdrop-blur-sm
-            ${Icon ? "pl-11" : "pl-5"} ${rightSlot ? "pr-12" : "pr-5"}`}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className={`advanced-input ${Icon ? "pl-12" : "pl-5"} ${rightSlot ? "pr-12" : "pr-5"}`}
         />
-        {rightSlot && <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightSlot}</div>}
+        {rightSlot && <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">{rightSlot}</div>}
       </div>
     </div>
   );
@@ -206,21 +216,16 @@ export default function LoginPage() {
   const resetAll = () => { setStep(STEP.LOGIN); setOtp(["","","","","",""]); setForgotEmail(""); setNewPwd(""); setConfirmPwd(""); };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#040c1a] px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#020617] px-4 py-12">
 
       {/* ── Background ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Grid lines */}
-        <div className="absolute inset-0"
-          style={{
-            backgroundImage: "linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px)",
-            backgroundSize: "48px 48px"
-          }}
-        />
+        <div className="absolute inset-0 dot-bg opacity-40" />
+        
         {/* Glows */}
-        <div className="absolute top-[-15%] left-[-5%] w-[600px] h-[600px] bg-indigo-700/20 rounded-full blur-[140px]" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-700/15 rounded-full blur-[120px]" />
-        <div className="absolute top-[45%] left-[55%] w-[300px] h-[300px] bg-purple-700/10 rounded-full blur-[100px]" />
+        <div className="absolute top-[-15%] left-[-5%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px]" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]" />
       </div>
 
       <AnimatePresence mode="wait">
@@ -230,7 +235,7 @@ export default function LoginPage() {
           <motion.div key="login" variants={cardVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.28, ease: "easeInOut" }} className="w-full max-w-md relative z-10">
 
             {/* Card */}
-            <div className="rounded-[2.5rem] border border-white/10 bg-white/[0.04] backdrop-blur-3xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] p-10">
+            <div className="rounded-[3rem] border border-slate-800/50 bg-slate-900/40 backdrop-blur-3xl shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] p-12">
 
               {/* Logo */}
               <div className="flex flex-col items-center mb-10">
@@ -304,7 +309,7 @@ export default function LoginPage() {
         {/* ════════ FORGOT ════════ */}
         {step === STEP.FORGOT && (
           <motion.div key="forgot" variants={cardVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.28 }} className="w-full max-w-md relative z-10">
-            <div className="rounded-[2.5rem] border border-white/10 bg-white/[0.04] backdrop-blur-3xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] p-10">
+            <div className="rounded-[3rem] border border-slate-800/50 bg-slate-900/40 backdrop-blur-3xl shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] p-12">
               <button onClick={goBack(STEP.LOGIN)} className="flex items-center gap-1.5 text-white/40 hover:text-white/80 transition-colors text-xs font-bold mb-8">
                 <ArrowLeft size={14} /> Back to Login
               </button>
@@ -339,7 +344,7 @@ export default function LoginPage() {
         {/* ════════ OTP ════════ */}
         {step === STEP.OTP && (
           <motion.div key="otp" variants={cardVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.28 }} className="w-full max-w-md relative z-10">
-            <div className="rounded-[2.5rem] border border-white/10 bg-white/[0.04] backdrop-blur-3xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] p-10">
+            <div className="rounded-[3rem] border border-slate-800/50 bg-slate-900/40 backdrop-blur-3xl shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] p-12">
               <button onClick={goBack(STEP.FORGOT)} className="flex items-center gap-1.5 text-white/40 hover:text-white/80 transition-colors text-xs font-bold mb-8">
                 <ArrowLeft size={14} /> Back
               </button>
@@ -369,9 +374,9 @@ export default function LoginPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
-                    className={`w-12 h-14 text-center text-2xl font-black rounded-2xl border-2 transition-all duration-150
-                      bg-white/5 text-white caret-indigo-400
-                      ${d ? "border-indigo-500/70 bg-indigo-500/10" : "border-white/10 focus:border-indigo-400/50 focus:bg-white/10"}
+                    className={`w-14 h-16 text-center text-3xl font-black rounded-2xl border transition-all duration-300
+                      bg-slate-800/50 text-white caret-indigo-400
+                      ${d ? "border-indigo-500/50 bg-indigo-500/10 shadow-[0_0_20px_rgba(99,102,241,0.2)]" : "border-slate-800 focus:border-indigo-500/50 focus:bg-slate-800"}
                       focus:outline-none`}
                   />
                 ))}
@@ -394,7 +399,7 @@ export default function LoginPage() {
         {/* ════════ RESET ════════ */}
         {step === STEP.RESET && (
           <motion.div key="reset" variants={cardVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.28 }} className="w-full max-w-md relative z-10">
-            <div className="rounded-[2.5rem] border border-white/10 bg-white/[0.04] backdrop-blur-3xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] p-10">
+            <div className="rounded-[3rem] border border-slate-800/50 bg-slate-900/40 backdrop-blur-3xl shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] p-12">
               <div className="flex flex-col items-center mb-8">
                 <div className="w-14 h-14 rounded-[1rem] bg-blue-500/15 border border-blue-500/25 flex items-center justify-center mb-4">
                   <ShieldCheck size={22} className="text-blue-300" />
@@ -458,7 +463,7 @@ export default function LoginPage() {
         {/* ════════ SUCCESS ════════ */}
         {step === STEP.SUCCESS && (
           <motion.div key="success" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", damping: 14 }} className="w-full max-w-md relative z-10">
-            <div className="rounded-[2.5rem] border border-white/10 bg-white/[0.04] backdrop-blur-3xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] p-12 text-center">
+            <div className="rounded-[3rem] border border-slate-800/50 bg-slate-900/40 backdrop-blur-3xl shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] p-12 text-center">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}

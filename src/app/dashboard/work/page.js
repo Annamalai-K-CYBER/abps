@@ -149,34 +149,34 @@ export default function WorkPage() {
         {/* ── Add Work Form ── */}
         <AnimatePresence>
           {isAdmin && showAdd && (
-            <motion.div key="add" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="glass rounded-[2rem] p-8 space-y-7 ring-1 ring-white/10">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 flex items-center justify-center border border-indigo-500/30">
-                  <Plus size={20} className="text-indigo-400" />
+            <motion.div key="add" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="glass rounded-[2.5rem] p-10 space-y-8 ring-1 ring-white/5 shadow-2xl shadow-black/40">
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                  <Plus size={24} className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="font-black text-slate-900 dark:text-white text-lg">New Assignment</p>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Post to all students</p>
+                  <p className="font-black text-white text-xl tracking-tight">New Assignment</p>
+                  <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-0.5">Post to all students</p>
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <label className="field-label">Subject</label>
-                  <input className="dark-input h-12" placeholder="e.g. Linear Algebra" value={form.subject}
+                  <input className="advanced-input h-14" placeholder="e.g. Linear Algebra" value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })} />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <label className="field-label">Deadline Date</label>
-                  <input type="date" className="dark-input h-12" value={form.deadline}
+                  <input type="date" className="advanced-input h-14" value={form.deadline}
                     onChange={e => setForm({ ...form, deadline: e.target.value })} />
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <label className="field-label">Work Details</label>
-                <textarea className="dark-input resize-none" rows={3} placeholder="Describe the assignment, topics, or instructions..."
+                <textarea className="advanced-input resize-none" rows={4} placeholder="Describe the assignment, topics, or instructions..."
                   value={form.work} onChange={e => setForm({ ...form, work: e.target.value })} />
               </div>
 
@@ -185,9 +185,9 @@ export default function WorkPage() {
                 <div className="relative group">
                   <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     onChange={e => setFile(e.target.files[0])} />
-                  <div className="dark-input h-12 flex items-center justify-between border-dashed group-hover:border-indigo-500/50 transition-colors">
+                  <div className="advanced-input h-14 flex items-center justify-between border-dashed group-hover:border-indigo-500/50 transition-all">
                     <span className="text-slate-500 font-medium">{file ? file.name : "Choose a file..."}</span>
-                    <Plus size={14} className="text-indigo-500" />
+                    <Plus size={16} className="text-indigo-400" />
                   </div>
                 </div>
               </div>

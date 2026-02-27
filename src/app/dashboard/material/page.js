@@ -98,39 +98,39 @@ export default function MaterialPage() {
         {/* ── Upload Panel ── */}
         <AnimatePresence>
           {showUpload && (
-            <motion.div key="upload" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="glass rounded-[2rem] p-8 space-y-7 ring-1 ring-white/10">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 flex items-center justify-center border border-indigo-500/30">
-                  <Upload size={20} className="text-indigo-400" />
+            <motion.div key="upload" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="glass rounded-[2.5rem] p-10 space-y-8 ring-1 ring-white/5 shadow-2xl shadow-black/40">
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                  <Upload size={24} className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="font-black text-slate-900 dark:text-white text-lg">New Resource</p>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Help others & earn points</p>
+                  <p className="font-black text-white text-xl tracking-tight">New Resource</p>
+                  <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-0.5">Help others & earn points</p>
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <label className="field-label">Material Name</label>
-                  <input className="dark-input h-12" placeholder="e.g. Unit 2 Midterm Prep" value={form.materialName}
+                  <input className="advanced-input h-14" placeholder="e.g. Unit 2 Midterm Prep" value={form.materialName}
                     onChange={e => setForm({ ...form, materialName: e.target.value })} />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <label className="field-label">Subject</label>
-                  <input className="dark-input h-12" placeholder="e.g. Linear Algebra" value={form.subject}
+                  <input className="advanced-input h-14" placeholder="e.g. Linear Algebra" value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })} />
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <label className="field-label">Select File</label>
                 <div className="relative group">
                   <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     onChange={e => setForm({ ...form, file: e.target.files[0] })} />
-                  <div className="dark-input h-12 flex items-center justify-between border-dashed group-hover:border-indigo-500/50 transition-colors">
+                  <div className="advanced-input h-14 flex items-center justify-between border-dashed group-hover:border-indigo-500/50 transition-all">
                     <span className="text-slate-500 font-medium">{form.file ? form.file.name : "Choose a PDF, Image or Doc..."}</span>
-                    <Upload size={14} className="text-indigo-500" />
+                    <Upload size={16} className="text-indigo-400" />
                   </div>
                 </div>
                 <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight pl-1">Max 10MB · Points awarded after success</p>

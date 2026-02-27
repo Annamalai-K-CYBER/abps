@@ -198,16 +198,16 @@ export default function DashboardHome() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 w-full max-w-lg shadow-2xl border border-slate-100 dark:border-slate-800"
+            className="bg-slate-900 rounded-[3rem] p-10 w-full max-w-lg shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] border border-slate-800/50"
           >
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex justify-between items-center mb-10">
               <div>
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white">Create a Poll</h2>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Engage your classmates with a quick question</p>
+                <h2 className="text-2xl font-black text-white tracking-tight">Create a Poll</h2>
+                <p className="text-slate-500 text-sm mt-1 font-medium">Engage your classmates with a quick question</p>
               </div>
               <button
                 onClick={() => { setShowPollModal(false); setPollMessage(""); }}
-                className="p-2 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 transition-colors"
+                className="p-3 rounded-2xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/5"
               >
                 <X size={20} />
               </button>
@@ -221,7 +221,7 @@ export default function DashboardHome() {
                   onChange={e => setPollQuestion(e.target.value)}
                   placeholder="e.g. Are you ready for tomorrow's lab?"
                   rows={3}
-                  className="dark-input resize-none"
+                  className="advanced-input h-auto min-h-[100px] resize-none"
                 />
               </div>
 
@@ -241,7 +241,7 @@ export default function DashboardHome() {
                           setPollOptions(updated);
                         }}
                         placeholder={`Option ${i + 1}`}
-                        className="dark-input"
+                        className="advanced-input h-14"
                       />
                       {pollOptions.length > 2 && (
                         <button
@@ -348,40 +348,36 @@ export default function DashboardHome() {
             animate={{ opacity: 1, scale: 1, transition: { delay: 0.15 } }}
             className="glass rounded-[2rem] p-7 ring-1 ring-black/5 dark:ring-white/5 shadow-xl"
           >
-            <div className="flex justify-between items-start mb-7">
+            <div className="flex justify-between items-start mb-8">
               <div>
-                <h3 className="text-xl font-black text-slate-800 dark:text-white">Daily Sync</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Log in daily to earn points</p>
+                <h3 className="text-xl font-black text-white tracking-tight">Daily Sync</h3>
+                <p className="text-slate-500 text-sm mt-0.5 font-medium">Log in daily to earn points</p>
               </div>
-              <div className="bg-orange-100 dark:bg-orange-900/30 p-2.5 rounded-2xl text-orange-500">
-                <Flame size={22} />
+              <div className="bg-orange-500/10 p-3 rounded-2xl text-orange-400 border border-orange-500/10">
+                <Flame size={24} />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-7">
-              <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl p-4 text-center">
-                <p className="text-[10px] uppercase font-black tracking-widest text-indigo-400 dark:text-indigo-500 mb-1">Sync Points</p>
-                <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{syncStats.points}</p>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="bg-indigo-500/5 rounded-[1.25rem] p-5 border border-indigo-500/10 text-center">
+                <p className="text-[10px] uppercase font-black tracking-[0.15em] text-indigo-400 mb-1.5 opacity-60">Sync Points</p>
+                <p className="text-3xl font-black text-indigo-400">{syncStats.points}</p>
               </div>
-              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-4 text-center">
-                <p className="text-[10px] uppercase font-black tracking-widest text-orange-400 mb-1">Day Streak</p>
-                <p className="text-2xl font-black text-orange-600 dark:text-orange-400">{syncStats.streak} 🔥</p>
+              <div className="bg-orange-500/5 rounded-[1.25rem] p-5 border border-orange-500/10 text-center">
+                <p className="text-[10px] uppercase font-black tracking-[0.15em] text-orange-400 mb-1.5 opacity-60">Day Streak</p>
+                <p className="text-3xl font-black text-orange-400">{syncStats.streak} 🔥</p>
               </div>
             </div>
 
             <button
               onClick={handleSync}
               disabled={syncing}
-              className={`w-full py-4 rounded-2xl font-black text-white flex items-center justify-center gap-3 transition-all shadow-lg ${
-                syncing 
-                  ? "bg-slate-400 dark:bg-slate-600 cursor-not-allowed" 
-                  : "bg-slate-900 dark:bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 shadow-slate-900/20 dark:shadow-indigo-500/25 active:scale-[0.97]"
-              }`}
+              className="btn-primary h-14"
             >
               {syncing ? (
                 <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Syncing...</>
               ) : (
-                <><CheckCircle2 size={20} /> Check In Now</>
+                <><CheckCircle2 size={18} /> Check In Now</>
               )}
             </button>
           </motion.div>

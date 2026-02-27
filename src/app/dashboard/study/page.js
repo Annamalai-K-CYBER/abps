@@ -132,33 +132,36 @@ export default function StudyPage() {
         {/* ── Add Topic Panel ── */}
         <AnimatePresence>
           {isAdmin && showAdd && (
-            <motion.div key="add" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="glass rounded-[2rem] p-8 space-y-7 ring-1 ring-white/10">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 flex items-center justify-center border border-indigo-500/30">
-                  <Plus size={20} className="text-indigo-400" />
+            <motion.div key="add" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="glass rounded-[2.5rem] p-10 space-y-8 ring-1 ring-white/5 shadow-2xl shadow-black/40">
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                  <Plus size={24} className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="font-black text-slate-900 dark:text-white text-lg">Log New Topic</p>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Update class progress</p>
+                  <p className="font-black text-white text-xl tracking-tight">Log New Topic</p>
+                  <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-0.5">Update class progress</p>
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-5">
-                <div className="space-y-2">
+              <div className="grid sm:grid-cols-3 gap-6">
+                <div className="space-y-2.5">
                   <label className="field-label">Subject</label>
-                  <select className="dark-input h-12 pr-10" value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
-                    <option value="">Select Subject</option>
-                    {subjects.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-                  </select>
+                  <div className="relative">
+                    <select className="advanced-input h-14 pr-12 appearance-none bg-indigo-500/5" value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
+                      <option value="" className="bg-slate-900 text-slate-400">Select Subject</option>
+                      {subjects.map(s => <option key={s.name} value={s.name} className="bg-slate-900 text-white">{s.name}</option>)}
+                    </select>
+                    <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                  </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <label className="field-label">Handling Staff</label>
-                  <input className="dark-input h-12 opacity-80" readOnly value={subjects.find(s => s.name === selectedSubject)?.staff || ""} placeholder="Select subject first" />
+                  <input className="advanced-input h-14 opacity-50" readOnly value={subjects.find(s => s.name === selectedSubject)?.staff || ""} placeholder="Select subject first" />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <label className="field-label">Topic Coverage</label>
-                  <input className="dark-input h-12" value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Unit 3 Intro" />
+                  <input className="advanced-input h-14" value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Unit 3 Intro" />
                 </div>
               </div>
               <button onClick={handleAdd} className="btn-primary h-14"><Plus size={18} /> Update Logs</button>

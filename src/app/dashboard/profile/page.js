@@ -20,23 +20,34 @@ function Toast({ msg, ok, onClose }) {
 
 function StatChip({ icon: Icon, label, value, color }) {
   return (
-    <div className={`glass rounded-2xl p-4 flex flex-col gap-1 border ${color}`}>
-      <div className="flex items-center gap-2">
-        <Icon size={14} className="opacity-60" />
-        <span className="section-label">{label}</span>
+    <motion.div 
+      whileHover={{ y: -4, scale: 1.02 }}
+      className={`glass rounded-[1.5rem] p-5 flex flex-col gap-1.5 border ${color} transition-all duration-300 shadow-lg shadow-black/20`}
+    >
+      <div className="flex items-center gap-2 px-1">
+        <div className="p-1.5 rounded-lg bg-white/5 border border-white/5">
+          <Icon size={12} className="text-indigo-400" />
+        </div>
+        <span className="section-label !text-[9px]">{label}</span>
       </div>
-      <p className="text-2xl font-black text-slate-900 dark:text-white">{value}</p>
-    </div>
+      <p className="text-2xl font-black text-white px-1 leading-tight">{value}</p>
+    </motion.div>
   );
 }
 
 function InputField({ label, type = "text", value, onChange, placeholder, icon: Icon, right }) {
   const [focused, setFocused] = useState(false);
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       {label && <label className="field-label ml-1">{label}</label>}
       <div className={`relative transition-all duration-300 ${focused ? "scale-[1.01]" : ""}`}>
-        {Icon && <Icon size={14} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${focused ? "text-indigo-400" : "text-slate-500"}`} />}
+        {Icon && (
+          <Icon 
+            size={15} 
+            className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 pointer-events-none
+              ${focused ? "text-indigo-400" : "text-slate-500/60"}`} 
+          />
+        )}
         <input 
           type={type} 
           value={value} 
@@ -44,8 +55,7 @@ function InputField({ label, type = "text", value, onChange, placeholder, icon: 
           placeholder={placeholder}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          className={`dark-input h-12 ${Icon ? "pl-11" : ""} ${right ? "pr-12" : ""} 
-            ${focused ? "ring-2 ring-indigo-500/30 border-indigo-500/50" : "border-black/5 dark:border-white/5"}`} 
+          className={`advanced-input h-14 ${Icon ? "pl-12" : ""} ${right ? "pr-12" : ""}`} 
         />
         {right && <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">{right}</div>}
       </div>
@@ -188,8 +198,8 @@ export default function ProfilePage() {
                   <User size={20} className="text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Personal Identity</h2>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Manage your public profile</p>
+                  <h2 className="text-xl font-black text-white tracking-tight">Personal Identity</h2>
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-0.5">Manage your public profile</p>
                 </div>
               </div>
             {[
@@ -203,8 +213,8 @@ export default function ProfilePage() {
                   <item.icon size={16} className={item.color} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-slate-900 dark:text-white text-sm">{item.label}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{item.sub}</p>
+                  <p className="font-bold text-white text-sm">{item.label}</p>
+                  <p className="text-xs text-slate-500 truncate">{item.sub}</p>
                 </div>
                 <div className={`w-2 h-2 rounded-full transition-colors ${panel === item.id ? "bg-indigo-400" : "bg-white/10 dark:bg-white/10"}`} />
               </button>
@@ -217,8 +227,8 @@ export default function ProfilePage() {
           {panel === "addEmail" && (
             <motion.div key="addEmail" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden">
-              <form onSubmit={handleAddEmail} className="glass rounded-[2rem] p-7 space-y-5">
-                <p className="font-black text-slate-900 dark:text-white">Add Secondary Email</p>
+              <form onSubmit={handleAddEmail} className="glass rounded-[2rem] p-7 space-y-6">
+                <p className="font-black text-white">Add Secondary Email</p>
                 <InputField icon={Mail} type="email" value={email1} onChange={e => setEmail1(e.target.value)} placeholder="recovery@email.com" />
                 <button type="submit" disabled={loading} className="btn-primary">{loading ? "Saving..." : "Save Email"}</button>
               </form>
@@ -227,8 +237,8 @@ export default function ProfilePage() {
           {panel === "changeEmail" && (
             <motion.div key="changeEmail" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden">
-              <form onSubmit={handleChangeEmail} className="glass rounded-[2rem] p-7 space-y-5">
-                <p className="font-black text-slate-900 dark:text-white">Change Secondary Email</p>
+              <form onSubmit={handleChangeEmail} className="glass rounded-[2rem] p-7 space-y-6">
+                <p className="font-black text-white">Change Secondary Email</p>
                 <InputField icon={Mail} type="email" value={newEmail1} onChange={e => setNewEmail1(e.target.value)} placeholder="new@email.com" />
                 <button type="submit" disabled={loading} className="btn-primary">{loading ? "Saving..." : "Update Email"}</button>
               </form>
@@ -237,8 +247,8 @@ export default function ProfilePage() {
           {panel === "changePwd" && (
             <motion.div key="changePwd" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden">
-              <form onSubmit={handlePasswordChange} className="glass rounded-[2rem] p-7 space-y-5">
-                <p className="font-black text-slate-900 dark:text-white">Change Password</p>
+              <form onSubmit={handlePasswordChange} className="glass rounded-[2.5rem] p-8 space-y-7 ring-1 ring-white/5">
+                <p className="font-black text-white text-lg">Change Password</p>
                 <InputField icon={KeyRound} type={showCur ? "text" : "password"} label="Current Password" value={form.currentPassword}
                   onChange={e => setForm({ ...form, currentPassword: e.target.value })} placeholder="Current password"
                   right={<button type="button" onClick={() => setShowCur(!showCur)} className="text-slate-500 hover:text-slate-300 p-1">{showCur ? <EyeOff size={14} /> : <Eye size={14} />}</button>} />

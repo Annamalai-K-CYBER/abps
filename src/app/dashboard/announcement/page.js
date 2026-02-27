@@ -31,7 +31,7 @@ export default function AnnouncementsPage() {
   const fetchAnnouncements = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://csbssync.vercel.app/api/announcements");
+      const res = await fetch("/api/announcements");
       const data = await res.json();
       if (data.success) setAnnouncements(data.announcements);
     } catch (err) {
@@ -64,7 +64,7 @@ export default function AnnouncementsPage() {
       const formData = new FormData();
       Object.entries(form).forEach(([k, v]) => v && formData.append(k, v));
 
-      const res = await fetch("https://csbssync.vercel.app/api/announcements", {
+      const res = await fetch("/api/announcements", {
         method: "POST",
         body: formData,
       });
@@ -86,7 +86,7 @@ export default function AnnouncementsPage() {
   // ✅ Delete announcement (Admin only)
   const handleDelete = async (id) => {
     if (!confirm("Delete this announcement?")) return;
-    await fetch(`https://csbssync.vercel.app/api/announcements?id=${id}`, {
+    await fetch(`/api/announcements?id=${id}`, {
       method: "DELETE",
     });
     fetchAnnouncements();

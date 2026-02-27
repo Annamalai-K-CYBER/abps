@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { jwtDecode } from "jwt-decode";
-import { Menu, X, LogOut, LayoutDashboard, BookOpen, Library, Briefcase, Bell, User as UserIcon, Activity, Sun, Moon } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, BookOpen, Library, Briefcase, Bell, User as UserIcon, Activity, Sun, Moon, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function DashboardLayout({ children }) {
@@ -65,7 +65,8 @@ export default function DashboardLayout({ children }) {
     { name: "Study", href: "/dashboard/study", icon: <BookOpen size={18} /> },
     { name: "Material", href: "/dashboard/material", icon: <Library size={18} /> },
     { name: "Work", href: "/dashboard/work", icon: <Briefcase size={18} /> },
-    { name: "Announcement", href: "/dashboard/announcement", icon: <Bell size={18} /> },
+    { name: "Announcements", href: "/dashboard/announcement", icon: <Bell size={18} /> },
+    { name: "Leaderboard", href: "/dashboard/leaderboard", icon: <Trophy size={18} /> },
     { name: "Profile", href: "/dashboard/profile", icon: <UserIcon size={18} /> },
   ];
 

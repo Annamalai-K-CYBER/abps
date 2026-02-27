@@ -91,9 +91,21 @@ export async function POST(req) {
       format: file.name.split(".").pop(),
     });
 
+    // ✅ Award Contribution Points
+    try {
+       await connectDB();
+       const User = (await import("@/models/User")).default;
+       await User.findOneAndUpdate(
+         { username: username }, 
+         { $inc: { contributionScore: 50, syncPoints: 20 } }
+       );
+    } catch (dbErr) {
+       console.error("Fail to award points:", dbErr);
+    }
+
     return NextResponse.json({
       success: true,
-      message: "File uploaded successfully!",
+      message: "File uploaded successfully! +50 Contribution Points awarded. ✨",
       url: uploadResponse.url,
       data: newMaterial,
     });

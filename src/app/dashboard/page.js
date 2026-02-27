@@ -32,8 +32,8 @@ export default function DashboardHome() {
     const headers = { "Authorization": `Bearer ${token}` };
 
     try {
-      // Fetch Announcements
-      const annRes = await fetch("https://csbssync.vercel.app/api/announcements");
+      // Fetch Announcements - Using relative path to avoid network issues
+      const annRes = await fetch("/api/announcements");
       const annData = await annRes.json();
       if (annData.success) setAnnouncements(annData.announcements);
 
@@ -41,7 +41,6 @@ export default function DashboardHome() {
       const workRes = await fetch("/api/work");
       const workData = await workRes.json();
       if (workData.success && workData.work.length > 0) {
-        // Find nearest deadline
         const sorted = workData.work.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
         const nearest = sorted.find(w => new Date(w.deadline) > new Date());
         if (nearest) setDeadline(nearest);
@@ -57,8 +56,15 @@ export default function DashboardHome() {
       const pollData = await pollRes.json();
       if (pollData.success) setPolls(pollData.polls);
 
+      // Fetch User Stats (Points/Streak)
+      const statsRes = await fetch("/api/sync-points", { headers });
+      const statsData = await statsRes.json();
+      if (statsData.success) {
+        setSyncStats({ points: statsData.points, streak: statsData.streak });
+      }
+
     } catch (err) {
-      console.error("Error fetching dashboard data:", err);
+      console.error("Critical: Error fetching dashboard data:", err);
     } finally {
       setLoading(false);
     }
@@ -89,20 +95,29 @@ export default function DashboardHome() {
     return () => clearInterval(interval);
   }, [deadline]);
 
+  const [syncing, setSyncing] = useState(false);
+
   const handleSync = async () => {
+    if (syncing) return;
+    setSyncing(true);
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("/api/sync-attendance", {
+      const res = await fetch("/api/sync-points", {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
-      alert(data.message);
       if (data.success) {
         setSyncStats({ points: data.points, streak: data.streak });
+        // Optional: show a toast instead of an alert
+        alert(data.message);
+      } else {
+        alert(data.message);
       }
     } catch (err) {
       alert("Fail to sync. Check connection.");
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -127,6 +142,14 @@ export default function DashboardHome() {
       console.error(err);
     }
   };
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[600px] gap-6">
+        <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <p className="font-bold text-slate-500 animate-pulse uppercase tracking-widest text-xs">Syncing Ecosystem...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-transparent">
@@ -151,7 +174,7 @@ export default function DashboardHome() {
             </motion.h1>
             
             {/* Assignment Timer Card */}
-            {deadline && (
+            {deadline ? (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -171,6 +194,10 @@ export default function DashboardHome() {
                   <p className="text-3xl font-black font-mono">{timeLeft}</p>
                 </div>
               </motion.div>
+            ) : (
+              <div className="p-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl text-center">
+                <p className="text-slate-400 font-medium italic">All clear! No upcoming deadlines detected. ✨</p>
+              </div>
             )}
           </div>
 
@@ -203,10 +230,11 @@ export default function DashboardHome() {
             
             <button 
               onClick={handleSync}
-              className="w-full py-4 bg-slate-900 dark:bg-indigo-600 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] transition-transform active:scale-95 shadow-lg"
+              disabled={syncing}
+              className={`w-full py-4 ${syncing ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-900 dark:bg-indigo-600 hover:scale-[1.02]'} text-white font-black rounded-2xl flex items-center justify-center gap-3 transition-transform active:scale-95 shadow-lg`}
             >
-              <CheckCircle2 size={20} />
-              Check In Now
+              <CheckCircle2 size={20} className={syncing ? "animate-spin" : ""} />
+              {syncing ? "Syncing..." : "Check In Now"}
             </button>
           </motion.div>
         </div>
@@ -229,16 +257,34 @@ export default function DashboardHome() {
               </div>
               
               <div className="grid sm:grid-cols-2 gap-6">
-                 {announcements.slice(0, 2).map((a, idx) => (
-                   <div key={a._id} className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 hover:shadow-xl transition-shadow group">
-                      <div className="h-40 bg-slate-100 dark:bg-slate-700 rounded-2xl mb-4 overflow-hidden">
-                        <img src={a.imageUrl || "/img/fallback.png"} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="sync" />
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 mb-2 block">{a.category}</span>
-                      <h4 className="font-bold text-slate-800 dark:text-white line-clamp-1">{a.topic}</h4>
-                      <p className="text-slate-500 text-xs mt-2 line-clamp-2">{a.details}</p>
+                 {announcements.length > 0 ? (
+                   announcements.slice(0, 4).map((a, idx) => (
+                     <motion.div 
+                      key={a._id} 
+                      whileHover={{ y: -5 }}
+                      className="bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl p-6 rounded-[2rem] border border-white/60 dark:border-slate-700/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all group"
+                     >
+                        <div className="h-44 bg-slate-100 dark:bg-slate-700 rounded-2xl mb-4 overflow-hidden relative">
+                          <img 
+                            src={a.imageUrl || "https://img.icons8.com/cute-clipart/512/no-image.png"} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                            alt="sync" 
+                          />
+                          <div className="absolute top-3 left-3">
+                             <span className="px-3 py-1 rounded-full bg-white/90 dark:bg-slate-900/90 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                               {a.category}
+                             </span>
+                          </div>
+                        </div>
+                        <h4 className="font-bold text-slate-800 dark:text-white line-clamp-1 group-hover:text-indigo-600 transition-colors">{a.topic}</h4>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs mt-2 line-clamp-2 leading-relaxed">{a.details}</p>
+                     </motion.div>
+                   ))
+                 ) : (
+                   <div className="col-span-2 py-10 text-center bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-700">
+                      <p className="text-slate-400 italic">No announcements found.</p>
                    </div>
-                 ))}
+                 )}
               </div>
             </section>
 
@@ -320,8 +366,11 @@ export default function DashboardHome() {
                   ))}
                </div>
                
-               <button className="w-full mt-8 py-3 rounded-2xl border border-slate-100 dark:border-slate-700 text-sm font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                  View Global Rank
+               <button 
+                onClick={fetchData}
+                className="w-full mt-8 py-3 rounded-2xl border border-slate-100 dark:border-slate-700 text-sm font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+               >
+                  Refresh Data
                </button>
             </section>
 

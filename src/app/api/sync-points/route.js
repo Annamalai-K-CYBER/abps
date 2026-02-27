@@ -61,3 +61,29 @@ export async function POST(req) {
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
+export async function GET(req) {
+  try {
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "supersecret");
+    
+    await connectDB();
+    const user = await User.findById(decoded.userId);
+    
+    if (!user) {
+      return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      points: user.syncPoints,
+      streak: user.streak
+    });
+  } catch (err) {
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+  }
+}

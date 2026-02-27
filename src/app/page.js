@@ -66,7 +66,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Mail, Lock, LogIn, Activity } from "lucide-react";
 
 export default function LoginPage() {

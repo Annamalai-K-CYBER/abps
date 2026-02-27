@@ -180,7 +180,7 @@ export default function StudyPage() {
                     <span className="badge badge-pending text-[10px]">{subj.topics.length} topics</span>
                   </div>
                   <h3 className="font-black text-white text-sm leading-snug">{subj.name}</h3>
-                  <p className="text-slate-600 text-xs mt-1">👩‍🏫 {subj.staff}</p>
+                  <p className="text-slate-400 text-xs mt-1 font-medium">👨‍🏫 {subj.staff}</p>
                 </div>
                 {open === i ? <ChevronUp size={16} className="text-slate-500 shrink-0 mt-1" /> : <ChevronDown size={16} className="text-slate-500 shrink-0 mt-1" />}
               </button>
@@ -200,7 +200,7 @@ export default function StudyPage() {
                           )}
                         </div>
                       )) : (
-                        <p className="text-slate-600 text-xs text-center italic py-4">No topics added yet</p>
+                        <p className="text-slate-500 text-xs text-center italic py-4">No topics logged yet</p>
                       )}
                     </div>
                   </motion.div>

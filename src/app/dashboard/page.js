@@ -202,12 +202,12 @@ export default function DashboardHome() {
           >
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-2xl font-black text-slate-800 dark:text-white">Create a Poll</h2>
+                <h2 className="text-2xl font-black text-white">Create a Poll</h2>
                 <p className="text-slate-400 text-sm mt-1">Engage your classmates with a quick question</p>
               </div>
               <button
                 onClick={() => { setShowPollModal(false); setPollMessage(""); }}
-                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                className="p-2 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 transition-colors"
               >
                 <X size={20} />
               </button>
@@ -302,7 +302,7 @@ export default function DashboardHome() {
             <motion.h1
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.1 } }}
-              className="text-4xl md:text-[3.25rem] font-black text-slate-900 dark:text-white tracking-tight leading-tight"
+              className="text-4xl md:text-[3.25rem] font-black text-white tracking-tight leading-tight"
             >
               Master Your{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-blue-500 to-purple-600">
@@ -350,8 +350,8 @@ export default function DashboardHome() {
           >
             <div className="flex justify-between items-start mb-7">
               <div>
-                <h3 className="text-xl font-black text-slate-800 dark:text-white">Daily Sync</h3>
-                <p className="text-slate-400 dark:text-slate-500 text-sm mt-0.5">Log in daily to earn points</p>
+                <h3 className="text-xl font-black text-white">Daily Sync</h3>
+                <p className="text-slate-400 text-sm mt-0.5">Log in daily to earn points</p>
               </div>
               <div className="bg-orange-100 dark:bg-orange-900/30 p-2.5 rounded-2xl text-orange-500">
                 <Flame size={22} />
@@ -398,9 +398,9 @@ export default function DashboardHome() {
             {/* Announcements */}
             <section>
               <div className="flex items-center justify-between mb-7">
-                <h2 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/50">
-                    <Bell className="text-indigo-600 dark:text-indigo-400" size={18} />
+                <h2 className="text-xl font-black text-white flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                    <Bell className="text-indigo-400" size={18} />
                   </div>
                   New Broadcasts
                 </h2>
@@ -429,8 +429,8 @@ export default function DashboardHome() {
                         </span>
                       </div>
                       <div className="p-5">
-                        <h4 className="font-bold text-slate-800 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{a.topic}</h4>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs mt-1.5 line-clamp-2 leading-relaxed">{a.details}</p>
+                        <h4 className="font-bold text-white line-clamp-1 group-hover:text-indigo-400 transition-colors">{a.topic}</h4>
+                        <p className="text-slate-500 text-xs mt-1.5 line-clamp-2 leading-relaxed">{a.details}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -445,9 +445,9 @@ export default function DashboardHome() {
             {/* Live Polls */}
             <section>
               <div className="flex items-center justify-between mb-7">
-                <h2 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-purple-100 dark:bg-purple-900/40">
-                    <Vote className="text-purple-600 dark:text-purple-400" size={18} />
+                <h2 className="text-xl font-black text-white flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                    <Vote className="text-purple-400" size={18} />
                   </div>
                   Live Polls
                 </h2>
@@ -478,9 +478,9 @@ export default function DashboardHome() {
                     return (
                       <div
                         key={poll._id}
-                        className="bg-white dark:bg-slate-800/80 rounded-[1.75rem] p-7 border border-slate-100 dark:border-slate-700 shadow-sm"
+                        className="glass rounded-[1.75rem] p-7 ring-1 ring-white/5"
                       >
-                        <p className="font-black text-slate-800 dark:text-white mb-6 text-base leading-snug">{poll.question}</p>
+                        <p className="font-black text-white mb-6 text-base leading-snug">{poll.question}</p>
                         <div className="space-y-3">
                           {poll.options.map(opt => {
                             const pct = total > 0 ? Math.round((opt.votes / total) * 100) : 0;
@@ -519,12 +519,12 @@ export default function DashboardHome() {
           <div className="space-y-8">
 
             {/* Leaderboard */}
-            <section className="bg-white dark:bg-slate-800/80 rounded-[2rem] p-7 border border-slate-100 dark:border-slate-700 shadow-xl dark:shadow-black/30">
+            <section className="glass rounded-[2rem] p-7 ring-1 ring-white/5">
               <div className="flex items-center gap-3 mb-7">
-                <div className="p-2 rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
-                  <Trophy className="text-yellow-600 dark:text-yellow-400" size={18} />
+                <div className="p-2 rounded-xl bg-yellow-400/10 border border-yellow-400/20">
+                  <Trophy className="text-yellow-400" size={18} />
                 </div>
-                <h3 className="text-lg font-black text-slate-800 dark:text-white">Top Contributors</h3>
+                <h3 className="text-lg font-black text-white">Top Contributors</h3>
               </div>
 
               <div className="space-y-4">
@@ -535,10 +535,10 @@ export default function DashboardHome() {
                         {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-black text-slate-800 dark:text-white truncate">{u.username}</p>
-                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{u.contributionScore} pts</p>
+                        <p className="text-sm font-black text-white truncate">{u.username}</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{u.contributionScore} pts</p>
                       </div>
-                      <p className="text-xs font-black text-indigo-600 dark:text-indigo-400 shrink-0">{u.syncPoints} SP</p>
+                      <p className="text-xs font-black text-indigo-400 shrink-0">{u.syncPoints} SP</p>
                     </div>
                   ))
                 ) : (

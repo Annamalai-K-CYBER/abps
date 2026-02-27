@@ -50,16 +50,16 @@ export default function LeaderboardPage() {
         <div className="flex items-center gap-4 mb-2">
           <Link
             href="/dashboard"
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="p-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 transition-colors"
           >
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight flex items-center gap-3">
               <Trophy className="text-yellow-500" size={36} />
               Leaderboard
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">
+            <p className="text-slate-500 text-sm mt-1 font-medium italic">
               Top CSBS contributors ranked by Sync Points & Contributions
             </p>
           </div>
@@ -212,7 +212,7 @@ export default function LeaderboardPage() {
             <div className="flex justify-center mt-10">
               <button
                 onClick={fetchData}
-                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-slate-400 font-bold hover:bg-white/10 transition-colors"
               >
                 <RefreshCw size={16} />
                 Refresh Rankings

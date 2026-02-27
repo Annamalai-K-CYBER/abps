@@ -93,13 +93,13 @@ export default function AnnouncementsPage() {
   };
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="min-h-screen dot-bg px-4 md:px-8 py-10">
       {/* Header Area */}
-      <div className="bg-slate-50 px-8 py-12">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="max-w-5xl mx-auto mb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
-               <Megaphone className="text-indigo-600" size={32} />
+            <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-4">
+               <Megaphone className="text-indigo-400" size={32} />
                Announcements
             </h1>
             <p className="text-slate-500 mt-2 font-medium">Your source for all official updates and events.</p>
@@ -109,7 +109,7 @@ export default function AnnouncementsPage() {
             <button 
               onClick={() => setShowAddForm(!showAddForm)}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${
-                showAddForm ? 'bg-slate-200 text-slate-700' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:translate-y-[-2px]'
+                showAddForm ? 'bg-white/10 text-white' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 hover:translate-y-[-2px]'
               }`}
             >
               {showAddForm ? <ChevronUp size={20} /> : <Plus size={20} />}
@@ -119,7 +119,7 @@ export default function AnnouncementsPage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto">
         
         {/* ✅ Admin Add Form */}
         <AnimatePresence>
@@ -132,7 +132,7 @@ export default function AnnouncementsPage() {
             >
               <form
                 onSubmit={handleAdd}
-                className="bg-white rounded-[2.5rem] p-8 shadow-2xl border border-indigo-50 flex flex-col gap-6"
+                className="glass rounded-[2.5rem] p-8 ring-1 ring-white/10 flex flex-col gap-6"
               >
                 <div className="flex items-center gap-3 text-indigo-600 font-black uppercase tracking-widest text-xs">
                    <Sparkles size={16} />
@@ -147,7 +147,7 @@ export default function AnnouncementsPage() {
                       placeholder="Give it a catchy title"
                       value={form.topic}
                       onChange={(e) => setForm({ ...form, topic: e.target.value })}
-                      className="w-full p-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all text-sm font-medium"
+                      className="dark-input h-12"
                     />
                   </div>
                   
@@ -156,7 +156,7 @@ export default function AnnouncementsPage() {
                     <select
                       value={form.category}
                       onChange={(e) => setForm({ ...form, category: e.target.value })}
-                      className="w-full p-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all text-sm font-bold appearance-none cursor-pointer"
+                      className="dark-input h-12 font-bold appearance-none cursor-pointer"
                     >
                       {categories.map((c) => (
                         <option key={c.name} value={c.name}>{c.name}</option>
@@ -172,7 +172,7 @@ export default function AnnouncementsPage() {
                     rows={4}
                     value={form.details}
                     onChange={(e) => setForm({ ...form, details: e.target.value })}
-                    className="w-full p-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all text-sm font-medium resize-none"
+                    className="dark-input resize-none"
                   />
                 </div>
 
@@ -188,7 +188,7 @@ export default function AnnouncementsPage() {
                     />
                     <label 
                       htmlFor="announcement-image"
-                      className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-dashed border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 transition-all cursor-pointer text-slate-500 hover:text-indigo-600 group-hover:shadow-lg"
+                      className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-dashed border-white/10 hover:border-indigo-500 hover:bg-indigo-500/5 transition-all cursor-pointer text-slate-500 hover:text-indigo-400 group-hover:shadow-lg"
                     >
                       <ImageIcon size={20} />
                       <span className="font-bold text-sm">{form.image ? form.image.name : "Choose an image file"}</span>
@@ -234,8 +234,8 @@ export default function AnnouncementsPage() {
                     onClick={() => setExpanded(isOpen ? null : cat.name)}
                     className={`w-full flex items-center justify-between p-6 rounded-3xl transition-all duration-300 ${
                        isOpen 
-                        ? `bg-${cat.color}-600 text-white shadow-xl shadow-${cat.color}-100` 
-                        : "bg-white hover:bg-slate-50 border border-slate-100 text-slate-800"
+                        ? `bg-${cat.color}-600 text-white shadow-xl shadow-${cat.color}-500/25` 
+                        : "glass glass-hover text-white"
                     }`}
                   >
                     <div className="flex items-center gap-4">
@@ -282,7 +282,7 @@ export default function AnnouncementsPage() {
                                 </div>
                                 <div className="p-8 flex flex-col flex-grow">
                                   <div className="flex justify-between items-start mb-4">
-                                     <h3 className="font-black text-slate-800 text-xl leading-tight">
+                                     <h3 className="font-black text-white text-xl leading-tight">
                                       {a.topic}
                                     </h3>
                                     {isAdmin && (
@@ -297,9 +297,9 @@ export default function AnnouncementsPage() {
                                   <p className="text-slate-500 text-sm leading-relaxed whitespace-pre-wrap flex-grow">
                                     {a.details}
                                   </p>
-                                  <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
-                                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 italic">Official Update</span>
-                                      <div className={`w-2 h-2 rounded-full bg-${cat.color}-500 animate-pulse`} />
+                                  <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+                                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-500 italic">Official Update</span>
+                                      <div className={`w-2 h-2 rounded-full bg-indigo-500 animate-pulse`} />
                                   </div>
                                 </div>
                               </motion.div>

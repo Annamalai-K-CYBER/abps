@@ -195,8 +195,8 @@ export default function MaterialPage() {
                             </div>
                             <div>
                               <p className="font-bold text-white text-sm leading-snug line-clamp-2">{mat.matname}</p>
-                              <p className="text-slate-600 text-xs mt-1">by {mat.name || "Unknown"}</p>
-                              {mat.uploadDate && <p className="text-slate-700 text-xs">{new Date(mat.uploadDate).toLocaleDateString()}</p>}
+                              <p className="text-slate-400 text-xs mt-1 font-medium italic">by {mat.name || "Unknown"}</p>
+                              {mat.uploadDate && <p className="text-slate-500 text-[10px] mt-0.5">{new Date(mat.uploadDate).toLocaleDateString()}</p>}
                             </div>
                             <button onClick={() => mat.link && window.open(mat.link.startsWith("http") ? mat.link : `https://${mat.link}`, "_blank")}
                               className="w-full py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold hover:bg-indigo-500/20 transition-colors flex items-center justify-center gap-2">

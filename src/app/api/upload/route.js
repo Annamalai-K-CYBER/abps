@@ -2,55 +2,46 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import ImageKit from "imagekit";
 
-// ✅ Ensure this runtime runs on Node.js
 export const runtime = "nodejs";
 
-// ======================
-// 🔹 MongoDB Connection
-// ======================
-const MONGODB_URI = process.env.MONGODB_URI;
-let isConnected = false;
-
+// ── DB ──
 async function connectDB() {
-  if (isConnected) return;
-  if (!MONGODB_URI) throw new Error("⚠️ MONGODB_URI not found in env.");
-
-  // ✅ Explicitly connect to the intended database
-  await mongoose.connect(MONGODB_URI, { dbName: "csbs_sync" });
-  isConnected = true;
-  console.log("✅ MongoDB Connected → csbs_portal (upload route)");
+  if (mongoose.connection.readyState >= 1) return;
+  await mongoose.connect(process.env.MONGODB_URI, { dbName: "csbs_sync" });
 }
 
-// ======================
-// 🔹 Mongoose Schema
-// ======================
+// ── Schemas ──
 const materialSchema = new mongoose.Schema(
-  {
-    matname: String,
-    subject: String,
-    name: String,
-    link: String,
-    uploadDate: Date,
-    format: String,
-  },
+  { matname: String, subject: String, name: String, link: String, uploadDate: Date, format: String },
   { collection: "materials" }
 );
+const Material = mongoose.models.Material || mongoose.model("Material", materialSchema);
 
-const Material =
-  mongoose.models.Material || mongoose.model("Material", materialSchema);
+const userSchema = new mongoose.Schema(
+  {
+    username: String,
+    name: String,
+    email: { type: String, unique: true },
+    email1: String,
+    password: String,
+    role: { type: String, default: "user" },
+    syncPoints: { type: Number, default: 0 },
+    contributionScore: { type: Number, default: 0 },
+    streak: { type: Number, default: 0 },
+    lastSync: Date,
+  },
+  { timestamps: true }
+);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
-// ======================
-// 🔹 ImageKit Setup
-// ======================
+// ── ImageKit ──
 const imagekit = new ImageKit({
   publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
   urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
-// ======================
-// 🔹 POST → Upload Material
-// ======================
+// ── POST /api/upload — open to ALL authenticated users ──
 export async function POST(req) {
   try {
     await connectDB();
@@ -63,57 +54,47 @@ export async function POST(req) {
     const uploadDate = formData.get("uploadDate");
 
     if (!file || !matname || !subject) {
-      return NextResponse.json(
-        { success: false, message: "Missing required fields!" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: "Missing required fields!" }, { status: 400 });
     }
 
-    // ✅ Convert file to base64
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64File = buffer.toString("base64");
-
-    // ✅ Upload to ImageKit
-    const uploadResponse = await imagekit.upload({
-      file: base64File,
+    // Upload to ImageKit
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const uploadRes = await imagekit.upload({
+      file: buffer.toString("base64"),
       fileName: file.name,
       folder: "/materials",
     });
 
-    // ✅ Save to MongoDB
+    // Save material
     const newMaterial = await Material.create({
       matname,
       subject,
       name: username,
-      link: uploadResponse.url,
+      link: uploadRes.url,
       uploadDate,
       format: file.name.split(".").pop(),
     });
 
-    // ✅ Award Contribution Points
-    try {
-       await connectDB();
-       const User = (await import("@/models/User")).default;
-       await User.findOneAndUpdate(
-         { username: username }, 
-         { $inc: { contributionScore: 50, syncPoints: 20 } }
-       );
-    } catch (dbErr) {
-       console.error("Fail to award points:", dbErr);
+    // ── Award points: +50 contribution + +20 sync points (material upload only) ──
+    if (username) {
+      try {
+        await User.findOneAndUpdate(
+          { username },
+          { $inc: { contributionScore: 50, syncPoints: 20 } }
+        );
+      } catch (e) {
+        console.error("Points award failed:", e);
+      }
     }
 
     return NextResponse.json({
       success: true,
-      message: "File uploaded successfully! +50 Contribution Points awarded. ✨",
-      url: uploadResponse.url,
+      message: "Uploaded! +50 Contribution Points & +20 Sync Points awarded. ✨",
+      url: uploadRes.url,
       data: newMaterial,
     });
-  } catch (error) {
-    console.error("❌ Upload error:", error);
-    return NextResponse.json(
-      { success: false, message: "Server error", error: error.message },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error("Upload error:", err);
+    return NextResponse.json({ success: false, message: "Server error", error: err.message }, { status: 500 });
   }
 }

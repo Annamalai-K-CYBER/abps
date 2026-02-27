@@ -9,6 +9,7 @@ async function connectDB() {
 const userSchema = new mongoose.Schema(
   {
     username: String,
+    name: String,
     email: { type: String, unique: true },
     password: String,
     role: { type: String, default: "user" },
@@ -22,15 +23,18 @@ const userSchema = new mongoose.Schema(
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
+// GET /api/leaderboard
+// Sorted by: syncPoints desc (syncPoints = check-in pts + material upload pts)
+// Returns: username, name, syncPoints, contributionScore (material uploads), streak
 export async function GET() {
   try {
     await connectDB();
     const topUsers = await User.find(
       {},
-      "username syncPoints streak contributionScore"
+      "username name syncPoints streak contributionScore"
     )
-      .sort({ contributionScore: -1, syncPoints: -1 })
-      .limit(10);
+      .sort({ syncPoints: -1, contributionScore: -1, streak: -1 })
+      .limit(20);
 
     return NextResponse.json({ success: true, leaderboard: topUsers });
   } catch (err) {

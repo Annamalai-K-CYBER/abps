@@ -13,12 +13,12 @@ export const connectDB = async () => {
 
   try {
     const db = await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      dbName: "csbs_sync",
     });
-    isConnected = db.connections[0].readyState;
-    console.log("✅ MongoDB Connected");
+    isConnected = db.connections[0].readyState === 1;
+    console.log("✅ MongoDB Connected (csbs_sync)");
   } catch (err) {
     console.error("❌ MongoDB Connection Error:", err);
+    throw err;
   }
 };

@@ -10,7 +10,7 @@ const pollSchema = new mongoose.Schema(
       },
     ],
     createdBy: String,
-    isActive: { type: String, default: "true" },
+    isActive: { type: Boolean, default: true },
     votedBy: [String], // Array of emails or userIds to prevent multiple votes
   },
   { timestamps: true }

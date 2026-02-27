@@ -70,6 +70,7 @@ export default function DashboardLayout({ children }) {
   ];
 
   return (
+    <div className={`min-h-screen transition-colors duration-500 ${darkMode ? "dark" : ""}`}>
     <div className={`min-h-screen transition-colors duration-500 ${darkMode ? "bg-slate-950 text-slate-100" : "bg-[#f1f5f9] text-slate-900"} selection:bg-indigo-100 selection:text-indigo-700`}>
       {/* Background Decorative Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
@@ -245,6 +246,7 @@ export default function DashboardLayout({ children }) {
           Powered by CSBS SYNC Engine © {new Date().getFullYear()} — Made for Excellence.
         </p>
       </footer>
+    </div>
     </div>
   );
 }

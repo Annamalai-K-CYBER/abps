@@ -6,9 +6,13 @@ import jwt from "jsonwebtoken";
 export async function GET() {
   try {
     await connectDB();
-    const activePolls = await Poll.find({ isActive: "true" }).sort({ createdAt: -1 });
+    // Support both boolean and legacy string "true"
+    const activePolls = await Poll.find({ 
+      $or: [{ isActive: true }, { isActive: "true" }] 
+    }).sort({ createdAt: -1 });
     return NextResponse.json({ success: true, polls: activePolls });
   } catch (err) {
+    console.error("Poll GET err:", err);
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
@@ -21,7 +25,7 @@ export async function POST(req) {
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "supersecret");
     
-    if (decoded.role !== "admin") return NextResponse.json({ success: false }, { status: 403 });
+    // Any authenticated user can create polls (admins can manage via DB)
 
     const { question, options } = await req.json();
     await connectDB();
@@ -49,14 +53,15 @@ export async function PUT(req) {
     await connectDB();
     
     const poll = await Poll.findById(pollId);
-    if (!poll || poll.votedBy.includes(decoded.email)) {
+    const voterId = decoded.userId || decoded.id || decoded.email;
+    if (!poll || poll.votedBy.includes(voterId)) {
       return NextResponse.json({ success: false, message: "Already voted or poll not found" }, { status: 400 });
     }
 
     const option = poll.options.id(optionId);
     if (option) {
       option.votes += 1;
-      poll.votedBy.push(decoded.email);
+      poll.votedBy.push(voterId);
       await poll.save();
     }
 

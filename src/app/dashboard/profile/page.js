@@ -31,14 +31,23 @@ function StatChip({ icon: Icon, label, value, color }) {
 }
 
 function InputField({ label, type = "text", value, onChange, placeholder, icon: Icon, right }) {
+  const [focused, setFocused] = useState(false);
   return (
     <div className="space-y-2">
-      {label && <label className="field-label">{label}</label>}
-      <div className="relative">
-        {Icon && <Icon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />}
-        <input type={type} value={value} onChange={onChange} placeholder={placeholder}
-          className={`dark-input ${Icon ? "pl-10" : ""} ${right ? "pr-12" : ""}`} />
-        {right && <div className="absolute right-3 top-1/2 -translate-y-1/2">{right}</div>}
+      {label && <label className="field-label ml-1">{label}</label>}
+      <div className={`relative transition-all duration-300 ${focused ? "scale-[1.01]" : ""}`}>
+        {Icon && <Icon size={14} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${focused ? "text-indigo-400" : "text-slate-500"}`} />}
+        <input 
+          type={type} 
+          value={value} 
+          onChange={onChange} 
+          placeholder={placeholder}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className={`dark-input h-12 ${Icon ? "pl-11" : ""} ${right ? "pr-12" : ""} 
+            ${focused ? "ring-2 ring-indigo-500/30 border-indigo-500/50" : "border-white/5"}`} 
+        />
+        {right && <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">{right}</div>}
       </div>
     </div>
   );

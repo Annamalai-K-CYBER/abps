@@ -133,26 +133,35 @@ export default function StudyPage() {
         <AnimatePresence>
           {isAdmin && showAdd && (
             <motion.div key="add" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="glass rounded-[2rem] p-7 space-y-5">
-              <p className="font-black text-white text-lg">Add New Topic</p>
-              <div className="grid sm:grid-cols-3 gap-4">
-                <div className="sm:col-span-1 space-y-2">
+              className="glass rounded-[2rem] p-8 space-y-7 ring-1 ring-white/10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 flex items-center justify-center border border-indigo-500/30">
+                  <Plus size={20} className="text-indigo-400" />
+                </div>
+                <div>
+                  <p className="font-black text-white text-lg">Log New Topic</p>
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Update class progress</p>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-5">
+                <div className="space-y-2">
                   <label className="field-label">Subject</label>
-                  <select className="dark-input" value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
+                  <select className="dark-input h-12 pr-10" value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
                     <option value="">Select Subject</option>
                     {subjects.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
                   </select>
                 </div>
-                <div className="sm:col-span-1 space-y-2">
-                  <label className="field-label">Staff</label>
-                  <input className="dark-input" readOnly value={subjects.find(s => s.name === selectedSubject)?.staff || ""} placeholder="Auto-filled" />
+                <div className="space-y-2">
+                  <label className="field-label">Handling Staff</label>
+                  <input className="dark-input h-12 opacity-80" readOnly value={subjects.find(s => s.name === selectedSubject)?.staff || ""} placeholder="Select subject first" />
                 </div>
-                <div className="sm:col-span-1 space-y-2">
-                  <label className="field-label">Topic Name</label>
-                  <input className="dark-input" value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Eigenvalues" />
+                <div className="space-y-2">
+                  <label className="field-label">Topic Coverage</label>
+                  <input className="dark-input h-12" value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Unit 3 Intro" />
                 </div>
               </div>
-              <button onClick={handleAdd} className="btn-primary"><Plus size={16} /> Add Topic</button>
+              <button onClick={handleAdd} className="btn-primary h-14"><Plus size={18} /> Update Logs</button>
             </motion.div>
           )}
         </AnimatePresence>

@@ -54,8 +54,8 @@ export default function DashboardHome() {
 
       if (workRes.status === "fulfilled") {
         const d = await workRes.value.json();
-        if (d.success && d.work?.length > 0) {
-          const sorted = d.work.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        if (d.success && d.works?.length > 0) {
+          const sorted = d.works.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
           const nearest = sorted.find(w => new Date(w.deadline) > new Date());
           if (nearest) setDeadline(nearest);
         }
@@ -213,24 +213,24 @@ export default function DashboardHome() {
               </button>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">Poll Question</label>
+                <label className="field-label">Poll Question</label>
                 <textarea
                   value={pollQuestion}
                   onChange={e => setPollQuestion(e.target.value)}
                   placeholder="e.g. Are you ready for tomorrow's lab?"
                   rows={3}
-                  className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm font-medium"
+                  className="dark-input resize-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 block">Answer Options</label>
+                <label className="field-label">Answer Options</label>
                 <div className="space-y-3">
                   {pollOptions.map((opt, i) => (
                     <div key={i} className="flex items-center gap-3">
-                      <span className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-black flex items-center justify-center shrink-0">
+                      <span className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 text-xs font-black flex items-center justify-center shrink-0 border border-indigo-500/20">
                         {String.fromCharCode(65 + i)}
                       </span>
                       <input
@@ -241,12 +241,12 @@ export default function DashboardHome() {
                           setPollOptions(updated);
                         }}
                         placeholder={`Option ${i + 1}`}
-                        className="flex-1 px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                        className="dark-input"
                       />
                       {pollOptions.length > 2 && (
                         <button
                           onClick={() => setPollOptions(pollOptions.filter((_, idx) => idx !== i))}
-                          className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                          className="p-2 text-slate-600 hover:text-red-400 transition-colors"
                         >
                           <X size={16} />
                         </button>
@@ -257,26 +257,26 @@ export default function DashboardHome() {
                 {pollOptions.length < 5 && (
                   <button
                     onClick={() => setPollOptions([...pollOptions, ""])}
-                    className="mt-3 flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:text-indigo-700 transition-colors"
+                    className="mt-4 flex items-center gap-2 text-indigo-400 text-sm font-bold hover:text-indigo-300 transition-colors pl-1"
                   >
-                    <Plus size={16} /> Add another option
+                    <Plus size={14} /> Add another option
                   </button>
                 )}
               </div>
 
               {pollMessage && (
-                <p className="text-red-500 text-sm font-medium bg-red-50 dark:bg-red-900/20 px-4 py-3 rounded-2xl">{pollMessage}</p>
+                <p className="text-red-400 text-xs font-bold bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-xl">{pollMessage}</p>
               )}
 
               <button
                 onClick={handleCreatePoll}
                 disabled={creatingPoll}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-black rounded-2xl flex items-center justify-center gap-3 transition-colors shadow-lg shadow-indigo-500/25"
+                className="btn-primary"
               >
                 {creatingPoll ? (
-                  <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Publishing...</>
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Publishing...</>
                 ) : (
-                  <><Vote size={20} /> Publish Poll</>
+                  <><Vote size={18} /> Publish Poll</>
                 )}
               </button>
             </div>

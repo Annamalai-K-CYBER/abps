@@ -86,52 +86,58 @@ export default function MaterialPage() {
             <button onClick={fetchMaterials} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl glass glass-hover text-slate-400 text-sm font-bold">
               <RefreshCw size={14} /> Refresh
             </button>
-            {isAdmin && (
-              <button onClick={() => setShowUpload(!showUpload)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-all shadow-lg shadow-indigo-500/25">
-                {showUpload ? "✕ Cancel" : <><Plus size={14} /> Upload</>}
-              </button>
-            )}
+            <button onClick={() => setShowUpload(!showUpload)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-lg
+                ${showUpload ? "bg-red-500/20 border border-red-500/30 text-red-400" : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/25"}`}>
+              {showUpload ? <X size={14} /> : <Plus size={14} />}
+              {showUpload ? "Cancel" : "Upload Material"}
+            </button>
           </div>
         </div>
 
         {/* ── Upload Panel ── */}
         <AnimatePresence>
-          {isAdmin && showUpload && (
+          {showUpload && (
             <motion.div key="upload" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="glass rounded-[2rem] p-8 space-y-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center">
-                  <Upload size={18} className="text-indigo-400" />
+              className="glass rounded-[2rem] p-8 space-y-7 ring-1 ring-white/10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 flex items-center justify-center border border-indigo-500/30">
+                  <Upload size={20} className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="font-black text-white">Upload Material</p>
-                  <p className="text-slate-500 text-xs">Awards 50 Contribution Points</p>
+                  <p className="font-black text-white text-lg">New Resource</p>
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Help others & earn points</p>
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="field-label">Material Name</label>
-                  <input className="dark-input" placeholder="e.g. Unit 2 Notes" value={form.materialName}
+                  <input className="dark-input h-12" placeholder="e.g. Unit 2 Midterm Prep" value={form.materialName}
                     onChange={e => setForm({ ...form, materialName: e.target.value })} />
                 </div>
                 <div className="space-y-2">
                   <label className="field-label">Subject</label>
-                  <input className="dark-input" placeholder="e.g. Linear Algebra" value={form.subject}
+                  <input className="dark-input h-12" placeholder="e.g. Linear Algebra" value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })} />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="field-label">File</label>
-                <input type="file" className="dark-input py-2 cursor-pointer file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-indigo-500/20 file:text-indigo-300 file:text-xs file:font-bold hover:file:bg-indigo-500/30"
-                  onChange={e => setForm({ ...form, file: e.target.files[0] })} />
-                {form.file && <p className="text-indigo-400 text-xs font-bold">📎 {form.file.name}</p>}
+                <label className="field-label">Select File</label>
+                <div className="relative group">
+                  <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    onChange={e => setForm({ ...form, file: e.target.files[0] })} />
+                  <div className="dark-input h-12 flex items-center justify-between border-dashed group-hover:border-indigo-500/50 transition-colors">
+                    <span className="text-slate-500 font-medium">{form.file ? form.file.name : "Choose a PDF, Image or Doc..."}</span>
+                    <Upload size={14} className="text-indigo-500" />
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight pl-1">Max 10MB · Points awarded after success</p>
               </div>
 
-              <button onClick={handleUpload} disabled={uploading} className="btn-primary">
-                {uploading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Uploading...</> : <><Upload size={16} /> Upload Material</>}
+              <button onClick={handleUpload} disabled={uploading} className="btn-primary h-14">
+                {uploading ? <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Uploading...</> : <><Upload size={18} /> Publish Material</>}
               </button>
             </motion.div>
           )}

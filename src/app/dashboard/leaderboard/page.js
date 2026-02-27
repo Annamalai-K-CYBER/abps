@@ -126,8 +126,12 @@ export default function LeaderboardPage() {
                         {user.username?.[0]?.toUpperCase() || "?"}
                         <span className="absolute -top-3 text-2xl">{cfg.badge}</span>
                       </div>
-                      <p className="font-black text-slate-800 dark:text-white text-sm text-center max-w-[80px] truncate">{user.username}</p>
-                      <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{user.syncPoints} SP</p>
+                      <p className="font-black text-white text-sm text-center max-w-[100px] truncate leading-tight mt-1">{user.name || user.username}</p>
+                      <p className="text-[10px] font-bold text-white/50 tracking-widest uppercase">{user.username}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-xs font-black text-indigo-400">{user.syncPoints} SP</p>
+                        {user.streak > 0 && <span className="text-[10px] font-black text-orange-400">🔥{user.streak}</span>}
+                      </div>
 
                       {/* Podium base */}
                       <div className={`mt-3 w-24 md:w-28 ${cfg.height} bg-gradient-to-b ${cfg.bg} rounded-t-2xl flex items-center justify-center shadow-lg ${cfg.shadow}`}>
@@ -173,26 +177,33 @@ export default function LeaderboardPage() {
                     {user.username?.[0]?.toUpperCase() || "?"}
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-black text-slate-800 dark:text-white truncate">{user.username}</p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                        {user.contributionScore} Contribution
-                      </span>
-                      {user.streak > 0 && (
-                        <span className="text-[10px] font-bold text-orange-500">
-                          {user.streak}🔥
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                   {/* Info */}
+                   <div className="flex-1 min-w-0">
+                     <p className="font-black text-white truncate text-base">{user.name || user.username}</p>
+                     <div className="flex items-center gap-3 mt-1">
+                       <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                         @{user.username}
+                       </span>
+                       <span className="w-1 h-1 rounded-full bg-white/10" />
+                       <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                         {user.contributionScore || 0} Contribution
+                       </span>
+                     </div>
+                   </div>
 
-                  {/* Points */}
-                  <div className="text-right shrink-0">
-                    <p className="text-lg font-black text-indigo-600 dark:text-indigo-400">{user.syncPoints}</p>
-                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Sync Pts</p>
-                  </div>
+                   {/* Stats */}
+                   <div className="flex items-center gap-6 shrink-0">
+                     {user.streak > 0 && (
+                       <div className="text-right">
+                         <p className="text-sm font-black text-orange-400 leading-none">{user.streak}🔥</p>
+                         <p className="text-[8px] font-black text-orange-500/50 uppercase tracking-tighter mt-1">Streak</p>
+                       </div>
+                     )}
+                     <div className="text-right min-w-[60px]">
+                       <p className="text-xl font-black text-indigo-400 leading-none">{user.syncPoints}</p>
+                       <p className="text-[8px] font-black text-indigo-500/50 uppercase tracking-tighter mt-1">Sync Points</p>
+                     </div>
+                   </div>
                 </motion.div>
               ))}
             </div>

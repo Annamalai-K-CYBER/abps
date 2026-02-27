@@ -150,32 +150,50 @@ export default function WorkPage() {
         <AnimatePresence>
           {isAdmin && showAdd && (
             <motion.div key="add" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="glass rounded-[2rem] p-7 space-y-5">
-              <p className="font-black text-white text-lg">New Assignment</p>
-              <div className="grid sm:grid-cols-2 gap-4">
+              className="glass rounded-[2rem] p-8 space-y-7 ring-1 ring-white/10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 flex items-center justify-center border border-indigo-500/30">
+                  <Plus size={20} className="text-indigo-400" />
+                </div>
+                <div>
+                  <p className="font-black text-white text-lg">New Assignment</p>
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Post to all students</p>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="field-label">Subject</label>
-                  <input className="dark-input" placeholder="e.g. Linear Algebra" value={form.subject}
+                  <input className="dark-input h-12" placeholder="e.g. Linear Algebra" value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <label className="field-label">Deadline</label>
-                  <input type="date" className="dark-input" value={form.deadline}
+                  <label className="field-label">Deadline Date</label>
+                  <input type="date" className="dark-input h-12" value={form.deadline}
                     onChange={e => setForm({ ...form, deadline: e.target.value })} />
                 </div>
               </div>
+
               <div className="space-y-2">
                 <label className="field-label">Work Details</label>
-                <textarea className="dark-input resize-none" rows={3} placeholder="Describe the assignment..."
+                <textarea className="dark-input resize-none" rows={3} placeholder="Describe the assignment, topics, or instructions..."
                   value={form.work} onChange={e => setForm({ ...form, work: e.target.value })} />
               </div>
+
               <div className="space-y-2">
-                <label className="field-label">Attachment (optional)</label>
-                <input type="file" className="dark-input py-2 cursor-pointer file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-indigo-500/20 file:text-indigo-300 file:text-xs file:font-bold hover:file:bg-indigo-500/30"
-                  onChange={e => setFile(e.target.files[0])} />
+                <label className="field-label">Upload Reference (optional)</label>
+                <div className="relative group">
+                  <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    onChange={e => setFile(e.target.files[0])} />
+                  <div className="dark-input h-12 flex items-center justify-between border-dashed group-hover:border-indigo-500/50 transition-colors">
+                    <span className="text-slate-500 font-medium">{file ? file.name : "Choose a file..."}</span>
+                    <Plus size={14} className="text-indigo-500" />
+                  </div>
+                </div>
               </div>
-              <button onClick={handleAdd} disabled={uploading} className="btn-primary">
-                {uploading ? "Uploading..." : "Add Assignment"}
+
+              <button onClick={handleAdd} disabled={uploading} className="btn-primary h-14">
+                {uploading ? <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</> : <><Plus size={18} /> Publish Assignment</>}
               </button>
             </motion.div>
           )}

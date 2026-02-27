@@ -66,6 +66,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Sparkles, Mail, Lock, LogIn, Activity } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -74,8 +76,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect if already logged in
+  // Load saved email on mount
   useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+    
+    // Redirect if already logged in
     const token = localStorage.getItem("token");
     if (token) router.push("/dashboard");
   }, [router]);
@@ -101,6 +109,9 @@ export default function LoginPage() {
       }
 
       if (data?.token) {
+        // Save email for next time
+        localStorage.setItem("rememberedEmail", email);
+        
         localStorage.setItem("token", data.token);
         if (data?.user?.role) localStorage.setItem("role", data.user.role);
         router.push("/dashboard");
@@ -115,61 +126,109 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl w-full max-w-md p-10 border border-gray-200 animate-fadeIn">
-        <h1 className="text-4xl font-extrabold text-center mb-2 text-gray-800">
-          CSBS SYNC
-        </h1>
-        <p className="text-center text-gray-500 mb-10 text-lg">
-          Stay connected. Learn. Collaborate. 🚀
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4 overflow-hidden relative">
+      {/* Background Blobs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-100/50 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-100/30 blur-[120px] rounded-full" />
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">
-              Id
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative z-10 bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100/50 w-full max-w-md p-10 md:p-12 border border-slate-100"
+      >
+        <div className="text-center mb-10">
+           <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest mb-4 border border-indigo-100"
+          >
+            <Activity size={12} />
+            Ecosystem Live
+          </motion.div>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-2 italic">
+            CSBS <span className="text-indigo-600 not-italic">Sync</span>
+          </h1>
+          <p className="text-slate-500 font-medium text-sm">
+            Synchronizing knowledge. Powering results. 🚀
+          </p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div className="space-y-2">
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+              Student / Admin ID
             </label>
-            <input
-              type="email"
-              placeholder="Enter your Id"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-200 bg-white"
-            />
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                <Mail size={18} />
+              </div>
+              <input
+                type="email"
+                placeholder="id@csbssync.com"
+                value={email}
+                autoComplete="email"
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full pl-11 pr-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all font-medium text-sm"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">
-              Password
+          <div className="space-y-2">
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+              Access Password
             </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-200 bg-white"
-            />
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                <Lock size={18} />
+              </div>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                autoComplete="current-password"
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full pl-11 pr-5 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all font-medium text-sm"
+              />
+            </div>
           </div>
 
-          {error && (
-            <p className="text-red-500 text-center font-medium">{error}</p>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="text-red-500 text-xs font-bold text-center bg-red-50 py-2 rounded-xl border border-red-100"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 mt-4 bg-gradient-to-r from-yellow-400 to-yellow-300 text-gray-900 font-semibold rounded-xl hover:scale-105 transform transition duration-300 shadow-md disabled:opacity-50"
+            className="w-full py-4 mt-6 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 hover:shadow-indigo-200 hover:translate-y-[-2px] transform transition-all active:scale-[0.98] disabled:opacity-50 disabled:translate-y-0 flex items-center justify-center gap-3"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                <LogIn size={20} />
+                Access Dashboard
+              </>
+            )}
           </button>
         </form>
 
-        <footer className="mt-8 text-center text-xs text-gray-400">
-          © {new Date().getFullYear()} CSBS SYNC | Built with ❤️ by Students
+        <footer className="mt-12 text-center">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            © {new Date().getFullYear()} CSBS Sync — Excellence in Motion
+          </p>
         </footer>
-      </div>
+      </motion.div>
     </div>
   );
 }

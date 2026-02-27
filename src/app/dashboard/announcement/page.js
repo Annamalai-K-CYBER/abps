@@ -1,6 +1,9 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Trash2, Megaphone, Calendar, Trophy, Info, Sparkles, ChevronDown, ChevronUp, Image as ImageIcon, LayoutList } from "lucide-react";
 
 export default function AnnouncementsPage() {
   const [form, setForm] = useState({
@@ -11,16 +14,17 @@ export default function AnnouncementsPage() {
   });
   const [announcements, setAnnouncements] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [expanded, setExpanded] = useState(null);
+  const [expanded, setExpanded] = useState("General");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true); // ✅ Loading state
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const categories = [
-    { name: "General", color: "from-indigo-500 to-blue-500" },
-    { name: "Events", color: "from-pink-500 to-rose-500" },
-    { name: "Exams", color: "from-yellow-500 to-orange-500" },
-    { name: "Updates", color: "from-emerald-500 to-teal-500" },
-    { name: "Achievements", color: "from-purple-500 to-fuchsia-500" },
+    { name: "General", color: "indigo", icon: <Megaphone size={18} /> },
+    { name: "Events", color: "rose", icon: <Calendar size={18} /> },
+    { name: "Exams", color: "orange", icon: <LayoutList size={18} /> },
+    { name: "Updates", color: "emerald", icon: <Info size={18} /> },
+    { name: "Achievements", color: "purple", icon: <Trophy size={18} /> },
   ];
 
   // ✅ Fetch announcements
@@ -68,6 +72,7 @@ export default function AnnouncementsPage() {
       const data = await res.json();
       if (data.success) {
         setForm({ topic: "", category: "General", details: "", image: null });
+        setShowAddForm(false);
         fetchAnnouncements();
       } else alert(data.error || "Error adding announcement");
     } catch (err) {
@@ -88,152 +93,227 @@ export default function AnnouncementsPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 px-3 py-6 sm:px-6">
-      <div className="max-w-6xl mx-auto flex flex-col gap-8">
-
-        {/* ✅ Header */}
-        <h1 className="text-[20px] sm:text-3xl md:text-4xl font-extrabold text-center text-indigo-700 drop-shadow-md">
-          📢 Announcements
-        </h1>
-
-        {/* ✅ Add Form (Admin Only) */}
-        {isAdmin && (
-          <form
-            onSubmit={handleAdd}
-            className="bg-white/90 backdrop-blur-md rounded-2xl p-5 sm:p-6 shadow-xl border border-purple-200 flex flex-col gap-4"
-          >
-            <div className="grid sm:grid-cols-2 gap-3">
-              <input
-                type="text"
-                placeholder="Topic"
-                value={form.topic}
-                onChange={(e) => setForm({ ...form, topic: e.target.value })}
-                className="p-2 rounded-lg border focus:ring-2 focus:ring-indigo-400"
-              />
-              <select
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="p-2 rounded-lg border focus:ring-2 focus:ring-indigo-400"
-              >
-                {categories.map((c) => (
-                  <option key={c.name}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <textarea
-              placeholder="Details"
-              rows={3}
-              value={form.details}
-              onChange={(e) => setForm({ ...form, details: e.target.value })}
-              className="p-2 rounded-lg border focus:ring-2 focus:ring-indigo-400"
-            />
-
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
-              className="p-2 rounded-lg border focus:ring-2 focus:ring-indigo-400"
-            />
-
-            <button
-              type="submit"
-              disabled={uploading}
-              className={`py-2 px-4 rounded-xl font-semibold text-white transition-all ${
-                uploading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+    <div className="bg-white min-h-screen">
+      {/* Header Area */}
+      <div className="bg-slate-50 px-8 py-12">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
+               <Megaphone className="text-indigo-600" size={32} />
+               Announcements
+            </h1>
+            <p className="text-slate-500 mt-2 font-medium">Your source for all official updates and events.</p>
+          </div>
+          
+          {isAdmin && (
+            <button 
+              onClick={() => setShowAddForm(!showAddForm)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${
+                showAddForm ? 'bg-slate-200 text-slate-700' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:translate-y-[-2px]'
               }`}
             >
-              {uploading ? "Uploading..." : "Add Announcement"}
+              {showAddForm ? <ChevronUp size={20} /> : <Plus size={20} />}
+              {showAddForm ? "Hide Editor" : "New Post"}
             </button>
-          </form>
-        )}
+          )}
+        </div>
+      </div>
 
-        {/* ✅ Loading Spinner */}
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="h-12 w-12 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : (
-          categories.map((cat) => {
-            const filtered = announcements.filter(
-              (a) => a.category === cat.name
-            );
-            return (
-              <div
-                key={cat.name}
-                className="bg-white/80 rounded-2xl overflow-hidden shadow-lg border border-indigo-100 transition-all"
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        
+        {/* ✅ Admin Add Form */}
+        <AnimatePresence>
+          {isAdmin && showAddForm && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginBottom: 40 }}
+              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+              className="overflow-hidden"
+            >
+              <form
+                onSubmit={handleAdd}
+                className="bg-white rounded-[2.5rem] p-8 shadow-2xl border border-indigo-50 flex flex-col gap-6"
               >
-                <button
-                  onClick={() =>
-                    setExpanded(expanded === cat.name ? null : cat.name)
-                  }
-                  className={`w-full flex justify-between items-center px-5 py-3 text-lg sm:text-xl font-semibold text-white bg-gradient-to-r ${cat.color}`}
-                >
-                  <span className="truncate">
-                    {cat.name}{" "}
-                    <span className="ml-2 bg-white/20 px-2 py-0.5 rounded-lg text-sm">
-                      {filtered.length}
-                    </span>
-                  </span>
-                  <span className="text-white text-lg">
-                    {expanded === cat.name ? "▲" : "▼"}
-                  </span>
-                </button>
-
-                {expanded === cat.name && (
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gradient-to-b from-white to-indigo-50">
-                    {filtered.length === 0 ? (
-                      <p className="text-gray-500 text-center w-full py-6">
-                        No announcements in this category.
-                      </p>
-                    ) : (
-                      filtered.map((a) => (
-                        <div
-                          key={a._id}
-                          className="flex flex-col overflow-hidden bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300"
-                        >
-                          {/* ✅ Dynamic image height */}
-                          <div className="w-full bg-gray-100 flex justify-center items-center overflow-hidden">
-                            <img
-                              src={
-                                a.imageUrl ||
-                                "https://img.icons8.com/cute-clipart/512/no-image.png"
-                              }
-                              alt={a.topic}
-                              className="w-full h-auto object-contain max-h-[400px] transition-transform duration-300 hover:scale-105"
-                            />
-                          </div>
-
-                          <div className="p-4 flex flex-col flex-grow justify-between">
-                            <div>
-                              <h3 className="font-bold text-indigo-700 text-lg">
-                                {a.topic}
-                              </h3>
-                              <p className="text-gray-700 text-sm mt-2 whitespace-pre-line">
-                                {a.details}
-                              </p>
-                            </div>
-
-                            {isAdmin && (
-                              <button
-                                onClick={() => handleDelete(a._id)}
-                                className="mt-3 bg-red-500 hover:bg-red-600 text-white py-1 rounded-lg text-sm transition"
-                              >
-                                Delete
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
+                <div className="flex items-center gap-3 text-indigo-600 font-black uppercase tracking-widest text-xs">
+                   <Sparkles size={16} />
+                   Create Official Broadcast
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Topic</label>
+                    <input
+                      type="text"
+                      placeholder="Give it a catchy title"
+                      value={form.topic}
+                      onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                      className="w-full p-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all text-sm font-medium"
+                    />
                   </div>
-                )}
-              </div>
-            );
-          })
-        )}
+                  
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Category</label>
+                    <select
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="w-full p-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all text-sm font-bold appearance-none cursor-pointer"
+                    >
+                      {categories.map((c) => (
+                        <option key={c.name} value={c.name}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Details</label>
+                  <textarea
+                    placeholder="Briefly describe the announcement..."
+                    rows={4}
+                    value={form.details}
+                    onChange={(e) => setForm({ ...form, details: e.target.value })}
+                    className="w-full p-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 transition-all text-sm font-medium resize-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Feature Image</label>
+                  <div className="relative group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
+                      className="hidden"
+                      id="announcement-image"
+                    />
+                    <label 
+                      htmlFor="announcement-image"
+                      className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-dashed border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 transition-all cursor-pointer text-slate-500 hover:text-indigo-600 group-hover:shadow-lg"
+                    >
+                      <ImageIcon size={20} />
+                      <span className="font-bold text-sm">{form.image ? form.image.name : "Choose an image file"}</span>
+                    </label>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className={`w-full py-4 px-8 rounded-2xl font-black text-white transition-all transform active:scale-[0.98] ${
+                    uploading
+                      ? "bg-slate-300 cursor-not-allowed shadow-none"
+                      : "bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100"
+                  }`}
+                >
+                  {uploading ? (
+                    <div className="flex items-center justify-center gap-3">
+                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                       Synchronizing...
+                    </div>
+                  ) : "Publish Announcement"}
+                </button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ✅ Categories List */}
+        <div className="space-y-6">
+          {loading ? (
+             <div className="space-y-4">
+                {[1, 2, 3].map(i => <div key={i} className="h-20 bg-slate-50 rounded-2xl animate-pulse" />)}
+             </div>
+          ) : (
+            categories.map((cat) => {
+              const filtered = announcements.filter((a) => a.category === cat.name);
+              const isOpen = expanded === cat.name;
+              
+              return (
+                <div key={cat.name} className="overflow-hidden">
+                  <button
+                    onClick={() => setExpanded(isOpen ? null : cat.name)}
+                    className={`w-full flex items-center justify-between p-6 rounded-3xl transition-all duration-300 ${
+                       isOpen 
+                        ? `bg-${cat.color}-600 text-white shadow-xl shadow-${cat.color}-100` 
+                        : "bg-white hover:bg-slate-50 border border-slate-100 text-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                       <div className={`p-2 rounded-xl ${isOpen ? 'bg-white/20' : `bg-${cat.color}-50 text-${cat.color}-600 text-balance`}`}>
+                          {cat.icon}
+                       </div>
+                       <div className="flex items-center gap-2">
+                          <span className="font-black text-lg tracking-tight">{cat.name}</span>
+                          <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${isOpen ? 'bg-white/20 text-white' : `bg-${cat.color}-100 text-${cat.color}-600`}`}>
+                            {filtered.length}
+                          </span>
+                       </div>
+                    </div>
+                    {isOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                  </button>
+
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 pt-6 pb-12">
+                          {filtered.length === 0 ? (
+                            <div className="col-span-full py-12 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                               <p className="text-slate-400 font-medium font-serif italic">No updates in this category yet.</p>
+                            </div>
+                          ) : (
+                            filtered.map((a, idx) => (
+                              <motion.div
+                                key={a._id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="group flex flex-col bg-white rounded-[2rem] border border-slate-100 hover:border-indigo-100 hover:shadow-2xl transition-all duration-500 overflow-hidden"
+                              >
+                                <div className="aspect-video bg-slate-50 overflow-hidden">
+                                  <img
+                                    src={a.imageUrl || "https://img.icons8.com/cute-clipart/512/no-image.png"}
+                                    alt={a.topic}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                  />
+                                </div>
+                                <div className="p-8 flex flex-col flex-grow">
+                                  <div className="flex justify-between items-start mb-4">
+                                     <h3 className="font-black text-slate-800 text-xl leading-tight">
+                                      {a.topic}
+                                    </h3>
+                                    {isAdmin && (
+                                      <button
+                                        onClick={() => handleDelete(a._id)}
+                                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                      >
+                                        <Trash2 size={18} />
+                                      </button>
+                                    )}
+                                  </div>
+                                  <p className="text-slate-500 text-sm leading-relaxed whitespace-pre-wrap flex-grow">
+                                    {a.details}
+                                  </p>
+                                  <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
+                                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 italic">Official Update</span>
+                                      <div className={`w-2 h-2 rounded-full bg-${cat.color}-500 animate-pulse`} />
+                                  </div>
+                                </div>
+                              </motion.div>
+                            ))
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );

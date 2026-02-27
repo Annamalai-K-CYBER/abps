@@ -9,8 +9,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect if already logged in
+  // Load saved email on mount
   useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+    
+    // Redirect if already logged in
     const token = localStorage.getItem("token");
     if (token) router.push("/dashboard");
   }, [router]);
@@ -36,6 +42,9 @@ export default function LoginPage() {
       }
 
       if (data?.token) {
+        // Save email for next time
+        localStorage.setItem("rememberedEmail", email);
+        
         localStorage.setItem("token", data.token);
         if (data?.user?.role) localStorage.setItem("role", data.user.role);
         router.push("/dashboard");
@@ -68,6 +77,7 @@ export default function LoginPage() {
               type="email"
               placeholder="Enter your Id"
               value={email}
+              autoComplete="email"
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-200 bg-white"
@@ -82,6 +92,7 @@ export default function LoginPage() {
               type="password"
               placeholder="Enter your password"
               value={password}
+              autoComplete="current-password"
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-200 bg-white"

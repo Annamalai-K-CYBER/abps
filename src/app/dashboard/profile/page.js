@@ -1,304 +1,241 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, Mail, Shield, Lock, Eye, EyeOff, CheckCircle2, AlertCircle, KeyRound, Zap, Flame, BarChart3, Edit3, X } from "lucide-react";
+
+function Toast({ msg, ok, onClose }) {
+  useEffect(() => { if (msg) { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); } }, [msg]);
+  if (!msg) return null;
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+      className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border text-sm font-bold
+        ${ok ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-300" : "bg-red-500/15 border-red-500/25 text-red-300"}`}>
+      {ok ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+      {msg}
+      <button onClick={onClose} className="ml-2 opacity-50 hover:opacity-100"><X size={14} /></button>
+    </motion.div>
+  );
+}
+
+function StatChip({ icon: Icon, label, value, color }) {
+  return (
+    <div className={`glass rounded-2xl p-4 flex flex-col gap-1 border ${color}`}>
+      <div className="flex items-center gap-2">
+        <Icon size={14} className="opacity-60" />
+        <span className="section-label">{label}</span>
+      </div>
+      <p className="text-2xl font-black text-white">{value}</p>
+    </div>
+  );
+}
+
+function InputField({ label, type = "text", value, onChange, placeholder, icon: Icon, right }) {
+  return (
+    <div className="space-y-2">
+      {label && <label className="field-label">{label}</label>}
+      <div className="relative">
+        {Icon && <Icon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />}
+        <input type={type} value={value} onChange={onChange} placeholder={placeholder}
+          className={`dark-input ${Icon ? "pl-10" : ""} ${right ? "pr-12" : ""}`} />
+        {right && <div className="absolute right-3 top-1/2 -translate-y-1/2">{right}</div>}
+      </div>
+    </div>
+  );
+}
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
+  const [syncStats, setSyncStats] = useState({ points: 0, streak: 0 });
 
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [showAddEmail, setShowAddEmail] = useState(false);
+  // Panels
+  const [panel, setPanel] = useState(null); // "addEmail" | "changeEmail" | "changePwd"
 
-  // ⭐ NEW: Change secondary email UI toggle
-  const [showChangeEmail, setShowChangeEmail] = useState(false);
-
+  // Email state
   const [email1, setEmail1] = useState("");
-
-  // ⭐ NEW: input value for changing email1
   const [newEmail1, setNewEmail1] = useState("");
 
-  const [form, setForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+  // Password state
+  const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [showCur, setShowCur] = useState(false);
+  const [showNew, setShowNew] = useState(false);
 
-  // Load user from token
+  // UI
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ msg: "", ok: false });
+  const notify = (msg, ok = true) => setToast({ msg, ok });
+
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setUser(decoded);
-      } catch (e) {
-        console.error("Invalid token", e);
-      }
-    }
+    if (!token) return;
+    try {
+      const d = jwtDecode(token);
+      setUser(d);
+      // fetch real sync stats
+      fetch("/api/sync-points", { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => { if (d.success) setSyncStats({ points: d.points, streak: d.streak }); });
+    } catch (e) { console.error(e); }
   }, []);
 
-  // ------------------------------
-  //  ADD SECONDARY EMAIL
-  // ------------------------------
   const handleAddEmail = async (e) => {
     e.preventDefault();
-
-    if (!email1.trim()) {
-      alert("Enter a valid email!");
-      return;
-    }
-
+    if (!email1.trim()) return notify("Enter a valid email!", false);
+    setLoading(true);
     try {
-      const res = await fetch("https://csbssync.vercel.app/api/addemail", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: user?.email,
-          email1,
-        }),
+      const res = await fetch("/api/addemail", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user?.email, email1 }),
       });
-
       const data = await res.json();
-
-      if (data.success) {
-        alert("Secondary email added successfully!");
-
-        // Update UI
-        setUser({ ...user, email1 });
-        setEmail1("");
-        setShowAddEmail(false);
-      } else {
-        alert(data.message || "Failed to add email!");
-      }
-    } catch {
-      alert("Server error! Try again later.");
-    }
+      if (data.success) { setUser({ ...user, email1 }); setEmail1(""); setPanel(null); notify("Secondary email added!"); }
+      else notify(data.message || "Failed!", false);
+    } catch { notify("Server error!", false); } finally { setLoading(false); }
   };
 
-  // ------------------------------
-  //  ⭐ NEW: CHANGE SECONDARY EMAIL
-  // ------------------------------
   const handleChangeEmail = async (e) => {
     e.preventDefault();
-
-    if (!newEmail1.trim()) {
-      alert("Please enter a valid new email!");
-      return;
-    }
-
+    if (!newEmail1.trim()) return notify("Enter a valid email!", false);
+    setLoading(true);
     try {
-      const res = await fetch("https://csbssync.vercel.app/api/changeemail1", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: user?.email,
-          email1: newEmail1,
-        }),
+      const res = await fetch("/api/changeemail1", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user?.email, email1: newEmail1 }),
       });
-
       const data = await res.json();
-
-      if (data.success) {
-        alert("Secondary email updated successfully!");
-
-        // update UI
-        setUser({ ...user, email1: newEmail1 });
-        setNewEmail1("");
-        setShowChangeEmail(false);
-      } else {
-        alert(data.message || "Failed to update email!");
-      }
-    } catch {
-      alert("Server error! Try again later.");
-    }
+      if (data.success) { setUser({ ...user, email1: newEmail1 }); setNewEmail1(""); setPanel(null); notify("Secondary email updated!"); }
+      else notify(data.message || "Failed!", false);
+    } catch { notify("Server error!", false); } finally { setLoading(false); }
   };
 
-  // ------------------------------
-  //  CHANGE PASSWORD
-  // ------------------------------
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    if (form.newPassword !== form.confirmPassword) {
-      alert("New passwords do not match!");
-      return;
-    }
-
+    if (form.newPassword !== form.confirmPassword) return notify("Passwords do not match!", false);
+    if (form.newPassword.length < 6) return notify("Password must be 6+ characters", false);
+    setLoading(true);
     try {
-      const res = await fetch(
-        "https://csbssync.vercel.app/api/change-password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: user?.email,
-            currentPassword: form.currentPassword,
-            newPassword: form.newPassword,
-          }),
-        }
-      );
-
+      const res = await fetch("/api/change-password", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user?.email, currentPassword: form.currentPassword, newPassword: form.newPassword }),
+      });
       const data = await res.json();
-      if (data.success) {
-        alert("Password changed successfully!");
-        setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-        setShowChangePassword(false);
-      } else {
-        alert(data.error || "Something went wrong!");
-      }
-    } catch {
-      alert("Server error. Please try again later.");
-    }
+      if (data.success) { setForm({ currentPassword: "", newPassword: "", confirmPassword: "" }); setPanel(null); notify("Password changed!"); }
+      else notify(data.error || "Failed!", false);
+    } catch { notify("Server error!", false); } finally { setLoading(false); }
   };
 
+  const avatar = user?.username?.[0]?.toUpperCase() || "?";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-400 via-purple-500 to-blue-500 px-4 py-10 text-gray-900">
-      <div className="w-full max-w-sm bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg">
-        <h1 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-pink-500 to-blue-600 text-transparent bg-clip-text">
-          My Profile
-        </h1>
+    <div className="min-h-screen dot-bg px-4 md:px-8 py-10">
+      <AnimatePresence><Toast msg={toast.msg} ok={toast.ok} onClose={() => setToast({ msg: "", ok: false })} /></AnimatePresence>
 
-        {user ? (
-          <>
-            <div className="space-y-4 mb-6 text-sm">
-              <div className="flex justify-between border-b border-gray-300 pb-2">
-                <span className="font-medium text-gray-700">Username:</span>
-                <span className="text-gray-800">{user.username}</span>
+      <div className="max-w-2xl mx-auto space-y-6">
+
+        {/* ── Profile Card ── */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          className="glass glass-hover rounded-[2rem] p-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <div className="w-20 h-20 rounded-[1.4rem] bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-indigo-500/30 glow-pulse">
+                {avatar}
               </div>
-
-              <div className="flex justify-between border-b border-gray-300 pb-2">
-                <span className="font-medium text-gray-700">Email:</span>
-                <span className="text-gray-800 break-all">{user.email}</span>
-              </div>
-
-              {user.email1 && (
-                <div className="flex justify-between border-b border-gray-300 pb-2">
-                  <span className="font-medium text-gray-700">
-                    Secondary Email:
-                  </span>
-                  <span className="text-gray-800 break-all">{user.email1}</span>
+              {user?.role === "admin" && (
+                <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Admin
                 </div>
               )}
             </div>
 
-            {/* ADD SECONDARY EMAIL BUTTON */}
-            {!user.email1 && (
-              <button
-                onClick={() => setShowAddEmail(!showAddEmail)}
-                className="w-full py-2 font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-emerald-600 hover:to-green-500 transition rounded-md mb-3"
-              >
-                {showAddEmail ? "Cancel" : "Add Secondary Email"}
+            {/* Info */}
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl font-black text-white">{user?.username || "Loading..."}</h1>
+              <p className="text-slate-400 text-sm mt-1">{user?.email}</p>
+              {user?.email1 && (
+                <div className="inline-flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                  <Shield size={11} className="text-emerald-400" />
+                  <span className="text-emerald-400 text-[11px] font-bold">{user.email1}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── Stats ── */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+          <p className="section-label mb-3 px-1">Activity</p>
+          <div className="grid grid-cols-3 gap-3">
+            <StatChip icon={Zap} label="Sync Points" value={syncStats.points} color="border-indigo-500/15" />
+            <StatChip icon={Flame} label="Streak" value={`${syncStats.streak}🔥`} color="border-orange-500/15" />
+            <StatChip icon={BarChart3} label="Role" value={user?.role === "admin" ? "Admin" : "Student"} color="border-blue-500/15" />
+          </div>
+        </motion.div>
+
+        {/* ── Action Buttons ── */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <p className="section-label mb-3 px-1">Account Settings</p>
+          <div className="glass rounded-[2rem] p-2 space-y-1">
+            {[
+              !user?.email1 && { id: "addEmail", icon: Mail, label: "Add Secondary Email", sub: "Required for password recovery", color: "text-emerald-400" },
+              user?.email1 && { id: "changeEmail", icon: Edit3, label: "Change Secondary Email", sub: user?.email1, color: "text-amber-400" },
+              { id: "changePwd", icon: Lock, label: "Change Password", sub: "Update your login password", color: "text-indigo-400" },
+            ].filter(Boolean).map(item => (
+              <button key={item.id} onClick={() => setPanel(panel === item.id ? null : item.id)}
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all hover:bg-white/5 text-left ${panel === item.id ? "bg-white/5" : ""}`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${panel === item.id ? "bg-indigo-500/20" : "bg-white/5"}`}>
+                  <item.icon size={16} className={item.color} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-white text-sm">{item.label}</p>
+                  <p className="text-xs text-slate-500 truncate">{item.sub}</p>
+                </div>
+                <div className={`w-2 h-2 rounded-full transition-colors ${panel === item.id ? "bg-indigo-400" : "bg-white/10"}`} />
               </button>
-            )}
+            ))}
+          </div>
+        </motion.div>
 
-            {/* ADD EMAIL FORM */}
-            {showAddEmail && (
-              <form onSubmit={handleAddEmail} className="mt-3 space-y-3 text-sm">
-                <input
-                  type="email"
-                  placeholder="Enter secondary email"
-                  value={email1}
-                  onChange={(e) => setEmail1(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
-                />
-                <button
-                  type="submit"
-                  className="w-full py-2 text-white font-semibold bg-gradient-to-r from-green-400 to-emerald-500 hover:from-emerald-500 hover:to-green-400 transition rounded-md"
-                >
-                  Save Email
-                </button>
+        {/* ── Panels ── */}
+        <AnimatePresence>
+          {panel === "addEmail" && (
+            <motion.div key="addEmail" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden">
+              <form onSubmit={handleAddEmail} className="glass rounded-[2rem] p-7 space-y-5">
+                <p className="font-black text-white">Add Secondary Email</p>
+                <InputField icon={Mail} type="email" value={email1} onChange={e => setEmail1(e.target.value)} placeholder="recovery@email.com" />
+                <button type="submit" disabled={loading} className="btn-primary">{loading ? "Saving..." : "Save Email"}</button>
               </form>
-            )}
-
-            {/* ⭐ NEW: CHANGE SECONDARY EMAIL BUTTON (ONLY IF EMAIL1 EXISTS) */}
-            {user.email1 && (
-              <button
-                onClick={() => setShowChangeEmail(!showChangeEmail)}
-                className="w-full mt-3 py-2 font-semibold text-white bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-orange-500 hover:to-yellow-500 transition rounded-md"
-              >
-                {showChangeEmail ? "Cancel" : "Change Secondary Email"}
-              </button>
-            )}
-
-            {/* ⭐ NEW: CHANGE SECONDARY EMAIL FORM */}
-            {showChangeEmail && (
-              <form
-                onSubmit={handleChangeEmail}
-                className="mt-3 space-y-3 text-sm"
-              >
-                <input
-                  type="email"
-                  placeholder="Enter new secondary email"
-                  value={newEmail1}
-                  onChange={(e) => setNewEmail1(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                />
-
-                <button
-                  type="submit"
-                  className="w-full py-2 text-white font-semibold bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-yellow-500 hover:to-orange-400 transition rounded-md"
-                >
-                  Update Secondary Email
-                </button>
+            </motion.div>
+          )}
+          {panel === "changeEmail" && (
+            <motion.div key="changeEmail" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden">
+              <form onSubmit={handleChangeEmail} className="glass rounded-[2rem] p-7 space-y-5">
+                <p className="font-black text-white">Change Secondary Email</p>
+                <InputField icon={Mail} type="email" value={newEmail1} onChange={e => setNewEmail1(e.target.value)} placeholder="new@email.com" />
+                <button type="submit" disabled={loading} className="btn-primary">{loading ? "Saving..." : "Update Email"}</button>
               </form>
-            )}
-
-            {/* CHANGE PASSWORD BUTTON */}
-            <button
-              onClick={() => setShowChangePassword(!showChangePassword)}
-              className="w-full mt-4 py-2 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-indigo-500 hover:to-blue-500 transition rounded-md"
-            >
-              {showChangePassword ? "Cancel" : "Change Password"}
-            </button>
-
-            {/* CHANGE PASSWORD FORM */}
-            {showChangePassword && (
-              <form onSubmit={handlePasswordChange} className="mt-6 space-y-3 text-sm">
-                <input
-                  type="password"
-                  placeholder="Current Password"
-                  value={form.currentPassword}
-                  onChange={(e) =>
-                    setForm({ ...form, currentPassword: e.target.value })
-                  }
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-400"
-                />
-
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={form.newPassword}
-                  onChange={(e) =>
-                    setForm({ ...form, newPassword: e.target.value })
-                  }
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
-                />
-
-                <input
-                  type="password"
-                  placeholder="Confirm Password"
-                  value={form.confirmPassword}
-                  onChange={(e) =>
-                    setForm({ ...form, confirmPassword: e.target.value })
-                  }
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-
-                <button
-                  type="submit"
-                  className="w-full py-2 text-white font-semibold bg-gradient-to-r from-indigo-400 to-blue-500 hover:from-blue-500 hover:to-indigo-400 transition rounded-md"
-                >
-                  Update Password
-                </button>
+            </motion.div>
+          )}
+          {panel === "changePwd" && (
+            <motion.div key="changePwd" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden">
+              <form onSubmit={handlePasswordChange} className="glass rounded-[2rem] p-7 space-y-5">
+                <p className="font-black text-white">Change Password</p>
+                <InputField icon={KeyRound} type={showCur ? "text" : "password"} label="Current Password" value={form.currentPassword}
+                  onChange={e => setForm({ ...form, currentPassword: e.target.value })} placeholder="Current password"
+                  right={<button type="button" onClick={() => setShowCur(!showCur)} className="text-slate-500 hover:text-slate-300 p-1">{showCur ? <EyeOff size={14} /> : <Eye size={14} />}</button>} />
+                <InputField icon={Lock} type={showNew ? "text" : "password"} label="New Password" value={form.newPassword}
+                  onChange={e => setForm({ ...form, newPassword: e.target.value })} placeholder="Min 6 characters"
+                  right={<button type="button" onClick={() => setShowNew(!showNew)} className="text-slate-500 hover:text-slate-300 p-1">{showNew ? <EyeOff size={14} /> : <Eye size={14} />}</button>} />
+                <InputField icon={Lock} type="password" label="Confirm Password" value={form.confirmPassword}
+                  onChange={e => setForm({ ...form, confirmPassword: e.target.value })} placeholder="Repeat password" />
+                <button type="submit" disabled={loading} className="btn-primary">{loading ? "Updating..." : "Update Password"}</button>
               </form>
-            )}
-          </>
-        ) : (
-          <p className="text-center text-gray-600">Loading profile...</p>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </div>
     </div>
   );

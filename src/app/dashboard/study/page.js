@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
-import { ChevronDown, ChevronUp, Trash2, Plus, Calendar } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, ChevronUp, Trash2, Plus, Calendar, BookOpen, X } from "lucide-react";
 
 export default function StudyPage() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -10,257 +11,195 @@ export default function StudyPage() {
   const [topic, setTopic] = useState("");
   const [topics, setTopics] = useState([]);
   const [showTimetable, setShowTimetable] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
 
-  // ✅ Subject + Staff data
   const subjects = [
     { name: "Linear Algebra", staff: "Ms.M.M.Shalini" },
     { name: "Problem solving using c", staff: "Dr.D.Ramya" },
     { name: "Business Communication and value Science", staff: "Dr.S.Kavitha" },
     { name: "Electronics And Microprocessor", staff: "Dr.M.Geetha" },
-    { name: "Physics For Information Science ", staff: "Dr.A.Sivakami" },
+    { name: "Physics For Information Science", staff: "Dr.A.Sivakami" },
   ];
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setIsAdmin(decoded.role === "admin");
-      } catch {
-        console.error("Invalid token");
-      }
-    }
+    if (token) { try { const d = jwtDecode(token); setIsAdmin(d.role === "admin"); } catch { } }
     fetchTopics();
   }, []);
 
-  // ✅ Fetch topics from backend
   const fetchTopics = async () => {
     try {
       const res = await fetch("/api/study");
-      if (!res.ok) throw new Error("Failed to fetch topics");
-      const data = await res.json();
-      setTopics(data);
-    } catch (err) {
-      console.error(err);
-      // fallback data
-      setTopics([
-        { _id: "1", subject: "Mathematics", staff: "Dr. S. Ramya", topic: "Calculus" },
-        { _id: "2", subject: "Mathematics", staff: "Dr. S. Ramya", topic: "Limits" },
-        { _id: "3", subject: "Database Systems", staff: "Dr. N. Priya", topic: "SQL Basics" },
-      ]);
-    }
+      if (!res.ok) throw new Error();
+      setTopics(await res.json());
+    } catch { setTopics([]); }
   };
 
-  const handleAddTopic = async () => {
-    if (!selectedSubject || !topic.trim()) return alert("Please fill all fields!");
-    const staffName = subjects.find((s) => s.name === selectedSubject)?.staff || "";
-    const newEntry = { subject: selectedSubject, staff: staffName, topic };
-
+  const handleAdd = async () => {
+    if (!selectedSubject || !topic.trim()) return alert("Fill all fields!");
+    const staffName = subjects.find(s => s.name === selectedSubject)?.staff || "";
     try {
       const res = await fetch("/api/study", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newEntry),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject: selectedSubject, staff: staffName, topic }),
       });
-      if (res.ok) {
-        const saved = await res.json();
-        setTopics([...topics, saved]);
-        setTopic("");
-        setSelectedSubject("");
-      } else throw new Error("Failed to add topic");
-    } catch (err) {
-      console.error(err);
-      alert("Error adding topic");
-    }
+      if (res.ok) { const saved = await res.json(); setTopics([...topics, saved]); setTopic(""); setSelectedSubject(""); setShowAdd(false); }
+      else throw new Error();
+    } catch { alert("Error adding topic"); }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this topic?")) return;
-    try {
-      const res = await fetch(`/api/study/${id}`, { method: "DELETE" });
-      if (res.ok) setTopics(topics.filter((t) => t._id !== id));
-    } catch (err) {
-      console.error(err);
-      alert("Delete failed");
-    }
+    if (!confirm("Delete?")) return;
+    const res = await fetch(`/api/study/${id}`, { method: "DELETE" });
+    if (res.ok) setTopics(topics.filter(t => t._id !== id));
   };
 
-  const toggleDropdown = (index) => setOpen(open === index ? null : index);
-  const grouped = subjects.map((subject) => ({
-    ...subject,
-    topics: topics.filter((t) => t.subject === subject.name),
-  }));
-
+  const grouped = subjects.map(s => ({ ...s, topics: topics.filter(t => t.subject === s.name) }));
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const timetable = [
     ["LA", "BCVS", "EMP LAB", "EMP LAB", "PSC LAB", "PSC LAB", "PSC LAB"],
     ["PIS", "LA", "BCVS", "EMP", "EP LAB", "EP LAB", "LA (T)"],
     ["PSC", "PSC LAB", "PSC LAB", "PSC LAB", "EMP", "PIS", "BCVS"],
-    ["BCVS LAB", "BCVS LAB", "PIS LAB / LIB / TWM", "PIS LAB / LIB / TWM", "PSC", "EMP", "LA"],
+    ["BCVS LAB", "BCVS LAB", "PIS LAB/LIB", "PIS LAB/LIB", "PSC", "EMP", "LA"],
     ["PSC", "BCVS", "SS", "SS", "LA", "PIS", "PT"],
     ["PIS", "PSC", "EMP", "LA", "COE", "COE", "COE"],
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-100 to-slate-100 p-4 sm:p-6 md:p-10 space-y-10">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-indigo-800 drop-shadow-sm">
-        📘 Study Progress Dashboard
-      </h1>
+    <div className="min-h-screen dot-bg px-4 md:px-8 py-10">
+      <div className="max-w-5xl mx-auto space-y-8">
 
-      {/* Timetable Button */}
-      <div className="flex justify-center">
-        <button
-          onClick={() => setShowTimetable(!showTimetable)}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-xl hover:bg-indigo-700 active:scale-95 transition text-sm sm:text-base"
-        >
-          <Calendar size={18} />
-          {showTimetable ? "Hide Timetable" : "Show Timetable"}
-        </button>
-      </div>
-
-      {/* 🗓️ Timetable */}
-      {showTimetable && (
-        <div className="bg-white/90 shadow-xl rounded-2xl border border-indigo-100 overflow-x-auto">
-          <h3 className="text-xl sm:text-2xl font-bold text-indigo-700 text-center py-3 border-b border-indigo-100">
-            🗓️ Weekly Timetable
-          </h3>
-          <table className="min-w-full text-center border-collapse text-xs sm:text-sm md:text-base">
-            <thead className="bg-indigo-100 text-indigo-800">
-              <tr>
-                <th className="p-2 sm:p-3 border border-indigo-100">Day</th>
-                {[1, 2, 3, 4, 5, 6, 7].map((p) => (
-                  <th key={p} className="p-2 sm:p-3 border border-indigo-100">
-                    Period {p}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {days.map((day, i) => (
-                <tr key={day} className="hover:bg-indigo-50 transition">
-                  <td className="p-2 sm:p-3 font-semibold border border-indigo-100 bg-indigo-50">
-                    {day}
-                  </td>
-                  {timetable[i].map((subj, j) => (
-                    <td
-                      key={`${day}-${j}`}
-                      className="p-2 sm:p-3 border border-indigo-100 text-gray-700"
-                    >
-                      {subj}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-              <tr className="bg-rose-100">
-                <td className="p-2 sm:p-3 font-semibold border border-indigo-100">Sunday</td>
-                <td colSpan={7} className="p-2 sm:p-3 border border-indigo-100 text-gray-600 italic">
-                  🌞 Holiday
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* ✅ Admin-only Add Topic Form */}
-      {isAdmin && (
-        <div className="bg-white/80 backdrop-blur-md border border-indigo-100 shadow-lg p-4 sm:p-6 rounded-2xl max-w-3xl mx-auto">
-          <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700 mb-4 text-center">
-            ➕ Add New Topic
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-            <select
-              className="p-2 sm:p-3 border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-400 text-sm sm:text-base"
-              value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-            >
-              <option value="">Select Subject</option>
-              {subjects.map((s) => (
-                <option key={s.name} value={s.name}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="text"
-              readOnly
-              placeholder="Staff Name"
-              value={subjects.find((s) => s.name === selectedSubject)?.staff || ""}
-              className="p-2 sm:p-3 border-2 border-indigo-200 rounded-xl bg-gray-50 text-gray-700 text-sm sm:text-base"
-            />
-
-            <input
-              type="text"
-              placeholder="Enter topic name"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              className="p-2 sm:p-3 border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-400 text-sm sm:text-base"
-            />
+        {/* ── Header ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-white">Study Progress</h1>
+            <p className="text-slate-500 text-sm mt-1">Track topics covered per subject</p>
           </div>
-
-          <div className="flex justify-end mt-4 sm:mt-5">
-            <button
-              onClick={handleAddTopic}
-              className="bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-xl hover:bg-indigo-700 active:scale-95 transition text-sm sm:text-base"
-            >
-              <Plus size={16} className="inline-block mr-1" />
-              Add Topic
+          <div className="flex gap-3 flex-wrap">
+            <button onClick={() => setShowTimetable(!showTimetable)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all
+                ${showTimetable ? "bg-blue-600/20 border border-blue-500/30 text-blue-300" : "glass glass-hover text-slate-400"}`}>
+              <Calendar size={14} /> {showTimetable ? "Hide Timetable" : "Timetable"}
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* Subject Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {grouped.map((subj, i) => (
-          <div
-            key={subj.name}
-            className="bg-gradient-to-b from-white to-indigo-50 border border-indigo-100 rounded-2xl shadow-md p-4 sm:p-5 hover:shadow-lg transition"
-          >
-            <div
-              onClick={() => toggleDropdown(i)}
-              className="flex justify-between items-center cursor-pointer"
-            >
-              <div>
-                <h3 className="text-lg sm:text-2xl font-bold text-indigo-700">{subj.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">👩‍🏫 {subj.staff}</p>
-              </div>
-              {open === i ? (
-                <ChevronUp className="text-indigo-600 w-5 h-5 sm:w-6 sm:h-6" />
-              ) : (
-                <ChevronDown className="text-indigo-600 w-5 h-5 sm:w-6 sm:h-6" />
-              )}
-            </div>
-
-            {open === i && (
-              <div className="mt-3 sm:mt-4 border-t border-indigo-100 pt-3 space-y-2 max-h-52 overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-indigo-100">
-                {subj.topics.length > 0 ? (
-                  subj.topics.map((t) => (
-                    <div
-                      key={t._id || t.id}
-                      className="bg-indigo-50 border border-indigo-100 rounded-xl py-2 px-3 text-gray-700 flex justify-between items-center text-sm sm:text-base"
-                    >
-                      <span>📘 {t.topic}</span>
-                      {isAdmin && (
-                        <button
-                          onClick={() => handleDelete(t._id || t.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-400 italic text-center text-sm">
-                    No topics added yet.
-                  </p>
-                )}
-              </div>
+            {isAdmin && (
+              <button onClick={() => setShowAdd(!showAdd)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-all shadow-lg shadow-indigo-500/25">
+                {showAdd ? <X size={14} /> : <Plus size={14} />}
+                {showAdd ? "Cancel" : "Add Topic"}
+              </button>
             )}
           </div>
-        ))}
+        </div>
+
+        {/* ── Timetable ── */}
+        <AnimatePresence>
+          {showTimetable && (
+            <motion.div key="tt" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+              className="glass rounded-[2rem] overflow-hidden">
+              <div className="px-6 py-4 border-b border-white/5">
+                <p className="font-black text-white">🗓️ Weekly Timetable</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-center">
+                  <thead>
+                    <tr className="border-b border-white/5">
+                      <th className="px-4 py-3 text-slate-500 font-bold">Day</th>
+                      {[1,2,3,4,5,6,7].map(p => (
+                        <th key={p} className="px-3 py-3 text-slate-500 font-bold">P{p}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {days.map((day, i) => (
+                      <tr key={day} className="hover:bg-white/3 transition-colors">
+                        <td className="px-4 py-3 font-bold text-indigo-400 text-left">{day}</td>
+                        {timetable[i].map((s, j) => (
+                          <td key={j} className="px-3 py-3 text-slate-400">{s}</td>
+                        ))}
+                      </tr>
+                    ))}
+                    <tr className="bg-red-500/5">
+                      <td className="px-4 py-3 font-bold text-red-400 text-left">Sunday</td>
+                      <td colSpan={7} className="text-slate-600 italic py-3">🌞 Holiday</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Add Topic Panel ── */}
+        <AnimatePresence>
+          {isAdmin && showAdd && (
+            <motion.div key="add" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+              className="glass rounded-[2rem] p-7 space-y-5">
+              <p className="font-black text-white text-lg">Add New Topic</p>
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-1 space-y-2">
+                  <label className="field-label">Subject</label>
+                  <select className="dark-input" value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
+                    <option value="">Select Subject</option>
+                    {subjects.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div className="sm:col-span-1 space-y-2">
+                  <label className="field-label">Staff</label>
+                  <input className="dark-input" readOnly value={subjects.find(s => s.name === selectedSubject)?.staff || ""} placeholder="Auto-filled" />
+                </div>
+                <div className="sm:col-span-1 space-y-2">
+                  <label className="field-label">Topic Name</label>
+                  <input className="dark-input" value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Eigenvalues" />
+                </div>
+              </div>
+              <button onClick={handleAdd} className="btn-primary"><Plus size={16} /> Add Topic</button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Subject Cards ── */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {grouped.map((subj, i) => (
+            <motion.div key={subj.name} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
+              className="glass glass-hover rounded-[1.75rem] overflow-hidden flex flex-col">
+
+              <button onClick={() => setOpen(open === i ? null : i)}
+                className="flex items-start justify-between p-6 hover:bg-white/3 transition-colors text-left">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen size={14} className="text-indigo-400" />
+                    <span className="badge badge-pending text-[10px]">{subj.topics.length} topics</span>
+                  </div>
+                  <h3 className="font-black text-white text-sm leading-snug">{subj.name}</h3>
+                  <p className="text-slate-600 text-xs mt-1">👩‍🏫 {subj.staff}</p>
+                </div>
+                {open === i ? <ChevronUp size={16} className="text-slate-500 shrink-0 mt-1" /> : <ChevronDown size={16} className="text-slate-500 shrink-0 mt-1" />}
+              </button>
+
+              <AnimatePresence>
+                {open === i && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden border-t border-white/5">
+                    <div className="p-4 space-y-2 max-h-52 overflow-y-auto">
+                      {subj.topics.length > 0 ? subj.topics.map(t => (
+                        <div key={t._id} className="flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-white/3 hover:bg-white/5 transition-colors">
+                          <span className="text-slate-300 text-xs font-medium">📌 {t.topic}</span>
+                          {isAdmin && (
+                            <button onClick={() => handleDelete(t._id)} className="text-slate-600 hover:text-red-400 transition-colors shrink-0">
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      )) : (
+                        <p className="text-slate-600 text-xs text-center italic py-4">No topics added yet</p>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,282 +1,210 @@
 "use client";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { motion, AnimatePresence } from "framer-motion";
+import { Upload, FolderOpen, ChevronDown, ChevronUp, FileText, Image, Download, Trash2, RefreshCw, Plus } from "lucide-react";
 
-export default function UploadPage() {
+export default function MaterialPage() {
   const [username, setUsername] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [file, setFile] = useState(null);
-  const [materialName, setMaterialName] = useState("");
-  const [subject, setSubject] = useState("");
-  const [uploading, setUploading] = useState(false);
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openSubject, setOpenSubject] = useState(null);
+  const [showUpload, setShowUpload] = useState(false);
 
-  // ✅ Fetch Materials
-  const fetchMaterials = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/materials");
-      const data = await res.json();
-      setMaterials(Array.isArray(data) ? data : data.data || []);
-    } catch (err) {
-      console.error("Error fetching materials:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [form, setForm] = useState({ materialName: "", subject: "", file: null });
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const d = jwtDecode(token);
+      setUsername(d?.username || "");
+      setIsAdmin(d?.role === "admin");
+    } catch { }
     fetchMaterials();
   }, []);
 
-  // ✅ Decode JWT
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setUsername(decoded?.username || "");
-        setIsAdmin(decoded?.role === "admin");
-      } catch (err) {
-        console.error("Invalid token:", err);
-      }
-    }
-  }, []);
+  const fetchMaterials = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/materials");
+      const data = await res.json();
+      setMaterials(Array.isArray(data) ? data : data.data || []);
+    } catch { } finally { setLoading(false); }
+  };
 
-  // ✅ Upload New Material
   const handleUpload = async () => {
-    if (!file || !materialName || !subject) {
-      alert("Please fill all fields and select a file!");
-      return;
-    }
-    if (!username) {
-      alert("You must log in first!");
-      return;
-    }
-
+    if (!form.file || !form.materialName || !form.subject) return alert("Fill all fields!");
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("username", username);
-    formData.append("materialName", materialName);
-    formData.append("subject", subject);
-    formData.append("uploadDate", new Date().toISOString());
-
+    const fd = new FormData();
+    fd.append("file", form.file);
+    fd.append("username", username);
+    fd.append("materialName", form.materialName);
+    fd.append("subject", form.subject);
+    fd.append("uploadDate", new Date().toISOString());
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
-      if (data.success) {
-        setMaterialName("");
-        setSubject("");
-        setFile(null);
-        fetchMaterials();
-      } else {
-        alert(data.message || "Upload failed!");
-      }
-    } catch (err) {
-      console.error("Upload error:", err);
-      alert("Upload failed");
-    } finally {
-      setUploading(false);
-    }
+      if (data.success) { setForm({ materialName: "", subject: "", file: null }); setShowUpload(false); fetchMaterials(); }
+      else alert(data.message || "Upload failed");
+    } catch { alert("Upload failed"); } finally { setUploading(false); }
   };
 
-  // ✅ Delete Material (Admin only)
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this material?")) return;
-    try {
-      const res = await fetch("/api/materials/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("✅ Material deleted successfully!");
-        fetchMaterials();
-      } else {
-        alert("⚠️ " + (data.message || "Failed to delete"));
-      }
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert("❌ Server error while deleting");
-    }
+    if (!confirm("Delete this material?")) return;
+    const res = await fetch("/api/materials/delete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json();
+    if (data.success) fetchMaterials();
+    else alert(data.message || "Delete failed");
   };
 
-  // ✅ Open Material
-  const handleViewClick = (url) => {
-    if (!url) {
-      alert("No valid link found!");
-      return;
-    }
-    try {
-      const finalUrl = url.startsWith("http") ? url : `https://${url}`;
-      window.open(finalUrl, "_blank", "noopener,noreferrer");
-    } catch (err) {
-      console.error("Invalid URL:", err);
-    }
-  };
-
-  // ✅ Group materials by subject
-  const grouped = materials.reduce((acc, mat) => {
-    const subj = mat.subject || "Uncategorized";
-    if (!acc[subj]) acc[subj] = [];
-    acc[subj].push(mat);
+  const grouped = materials.reduce((acc, m) => {
+    const s = m.subject || "Uncategorized";
+    if (!acc[s]) acc[s] = [];
+    acc[s].push(m);
     return acc;
   }, {});
 
-  // ✅ UI Rendering
+  const isImage = (fmt) => ["png", "jpg", "jpeg", "gif", "webp"].includes(fmt?.toLowerCase() || "");
+
   return (
-    <div className="min-h-screen w-full flex flex-col items-center py-10 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-100">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-          CSBS Study Materials 📚
-        </h1>
-        <p className="text-gray-600 mt-2">
-          {username ? `Welcome, ${username} 👋` : "Please log in first."}
-        </p>
-      </div>
+    <div className="min-h-screen dot-bg px-4 md:px-8 py-10">
+      <div className="max-w-5xl mx-auto space-y-8">
 
-      {/* Admin Upload Section */}
-      {isAdmin && (
-        <div className="w-[90%] max-w-xl bg-white/80 shadow p-8 rounded-xl border border-gray-200 mb-10">
-          <h2 className="text-xl font-semibold text-blue-700 mb-4 text-center">
-            Upload New Material
-          </h2>
-
-          <input
-            type="text"
-            placeholder="Material name"
-            value={materialName}
-            onChange={(e) => setMaterialName(e.target.value)}
-            className="w-full mb-3 p-2 border border-gray-300 rounded-md"
-          />
-          <input
-            type="text"
-            placeholder="Subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-full mb-3 p-2 border border-gray-300 rounded-md"
-          />
-          <input
-            type="file"
-            onChange={(e) => setFile(e.target.files[0])}
-            className="w-full mb-4 border border-gray-300 rounded-md p-2 bg-white"
-          />
-
-          <button
-            onClick={handleUpload}
-            disabled={uploading}
-            className={`w-full py-3 font-semibold rounded-md text-white transition-all ${
-              uploading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90"
-            }`}
-          >
-            {uploading ? "Uploading..." : "🚀 Upload Material"}
-          </button>
-        </div>
-      )}
-
-      {/* Materials List */}
-      <div className="w-[95%] max-w-6xl bg-white shadow p-8 rounded-xl border border-gray-200">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-blue-700">Available Materials</h2>
-          <button
-            onClick={fetchMaterials}
-            className="text-sm bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
-          >
-            🔄 Refresh
-          </button>
+        {/* ── Header ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-white">Study Materials</h1>
+            <p className="text-slate-500 text-sm mt-1">All resources organized by subject</p>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={fetchMaterials} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl glass glass-hover text-slate-400 text-sm font-bold">
+              <RefreshCw size={14} /> Refresh
+            </button>
+            {isAdmin && (
+              <button onClick={() => setShowUpload(!showUpload)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-all shadow-lg shadow-indigo-500/25">
+                {showUpload ? "✕ Cancel" : <><Plus size={14} /> Upload</>}
+              </button>
+            )}
+          </div>
         </div>
 
-        {loading ? (
-          <p className="text-center text-gray-500 animate-pulse">Loading...</p>
-        ) : materials.length > 0 ? (
-          <div className="space-y-4">
-            {Object.keys(grouped).map((subject) => (
-              <div
-                key={subject}
-                className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 rounded-xl shadow-sm"
-              >
-                {/* Subject Header */}
-                <div
-                  onClick={() =>
-                    setOpenSubject(openSubject === subject ? null : subject)
-                  }
-                  className="cursor-pointer flex justify-between items-center px-6 py-4"
-                >
-                  <h3 className="text-lg font-semibold text-blue-700">
-                    📘 {subject}
-                  </h3>
-                  <span className="text-gray-500">
-                    {openSubject === subject ? "▲" : "▼"}
-                  </span>
+        {/* ── Upload Panel ── */}
+        <AnimatePresence>
+          {isAdmin && showUpload && (
+            <motion.div key="upload" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+              className="glass rounded-[2rem] p-8 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center">
+                  <Upload size={18} className="text-indigo-400" />
                 </div>
-
-                {/* Dropdown Material List */}
-                {openSubject === subject && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6 border-t border-blue-100 bg-white rounded-b-xl">
-                    {grouped[subject].map((mat) => (
-                      <div
-                        key={mat._id}
-                        className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
-                      >
-                        <h4 className="text-base font-semibold text-gray-800 mb-1">
-                          {mat.matname}
-                        </h4>
-                        <p className="text-xs text-gray-500 mb-1">
-                          Uploaded:{" "}
-                          {mat.uploadDate
-                            ? new Date(mat.uploadDate).toLocaleDateString()
-                            : "N/A"}
-                        </p>
-                        <p className="text-xs text-gray-500 mb-2">
-                          By: {mat.name || "Unknown"}
-                        </p>
-
-                        <img
-                          src={
-                            ["png", "jpg", "jpeg"].includes(
-                              mat.format?.toLowerCase?.() || ""
-                            )
-                              ? "https://img.icons8.com/fluency/96/image.png"
-                              : "https://img.icons8.com/fluency/96/document.png"
-                          }
-                          alt="icon"
-                          className="w-12 h-12 mx-auto mb-3"
-                        />
-
-                        <button
-                          onClick={() => handleViewClick(mat.link)}
-                          className="w-full py-2 rounded-md bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold hover:opacity-90 transition"
-                        >
-                          🔗 View / Download
-                        </button>
-
-                        {isAdmin && (
-                          <button
-                            onClick={() => handleDelete(mat._id)}
-                            className="mt-2 w-full py-2 rounded-md bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition"
-                          >
-                            🗑 Delete
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div>
+                  <p className="font-black text-white">Upload Material</p>
+                  <p className="text-slate-500 text-xs">Awards 50 Contribution Points</p>
+                </div>
               </div>
-            ))}
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="field-label">Material Name</label>
+                  <input className="dark-input" placeholder="e.g. Unit 2 Notes" value={form.materialName}
+                    onChange={e => setForm({ ...form, materialName: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <label className="field-label">Subject</label>
+                  <input className="dark-input" placeholder="e.g. Linear Algebra" value={form.subject}
+                    onChange={e => setForm({ ...form, subject: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="field-label">File</label>
+                <input type="file" className="dark-input py-2 cursor-pointer file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-indigo-500/20 file:text-indigo-300 file:text-xs file:font-bold hover:file:bg-indigo-500/30"
+                  onChange={e => setForm({ ...form, file: e.target.files[0] })} />
+                {form.file && <p className="text-indigo-400 text-xs font-bold">📎 {form.file.name}</p>}
+              </div>
+
+              <button onClick={handleUpload} disabled={uploading} className="btn-primary">
+                {uploading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Uploading...</> : <><Upload size={16} /> Upload Material</>}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Materials ── */}
+        {loading ? (
+          <div className="flex flex-col items-center py-20 gap-4">
+            <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-slate-500 text-sm animate-pulse uppercase tracking-widest font-bold">Loading...</p>
+          </div>
+        ) : Object.keys(grouped).length === 0 ? (
+          <div className="glass rounded-3xl py-20 text-center">
+            <FolderOpen size={48} className="mx-auto text-slate-700 mb-4" />
+            <p className="text-slate-500 font-semibold">No materials uploaded yet.</p>
           </div>
         ) : (
-          <p className="text-center text-gray-500">No materials available yet.</p>
+          <div className="space-y-4">
+            {Object.entries(grouped).map(([subject, mats], si) => (
+              <motion.div key={subject} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: si * 0.05 }}
+                className="glass rounded-[2rem] overflow-hidden">
+
+                {/* Subject toggle */}
+                <button onClick={() => setOpenSubject(openSubject === subject ? null : subject)}
+                  className="w-full flex items-center justify-between px-7 py-5 hover:bg-white/3 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center">
+                      <FolderOpen size={16} className="text-indigo-400" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-black text-white">{subject}</p>
+                      <p className="text-slate-500 text-xs">{mats.length} file{mats.length !== 1 ? "s" : ""}</p>
+                    </div>
+                  </div>
+                  {openSubject === subject ? <ChevronUp size={18} className="text-slate-500" /> : <ChevronDown size={18} className="text-slate-500" />}
+                </button>
+
+                <AnimatePresence>
+                  {openSubject === subject && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden border-t border-white/5">
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                        {mats.map(mat => (
+                          <motion.div key={mat._id} whileHover={{ y: -4 }}
+                            className="glass glass-hover rounded-2xl p-5 flex flex-col gap-4">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
+                                {isImage(mat.format) ? <Image size={18} className="text-indigo-400" /> : <FileText size={18} className="text-blue-400" />}
+                              </div>
+                              {isAdmin && (
+                                <button onClick={() => handleDelete(mat._id)} className="p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-bold text-white text-sm leading-snug line-clamp-2">{mat.matname}</p>
+                              <p className="text-slate-600 text-xs mt-1">by {mat.name || "Unknown"}</p>
+                              {mat.uploadDate && <p className="text-slate-700 text-xs">{new Date(mat.uploadDate).toLocaleDateString()}</p>}
+                            </div>
+                            <button onClick={() => mat.link && window.open(mat.link.startsWith("http") ? mat.link : `https://${mat.link}`, "_blank")}
+                              className="w-full py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold hover:bg-indigo-500/20 transition-colors flex items-center justify-center gap-2">
+                              <Download size={13} /> View / Download
+                            </button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
         )}
       </div>
     </div>

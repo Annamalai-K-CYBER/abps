@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, Trash2, Plus, Calendar, BookOpen, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Plus, Calendar, BookOpen, X, Bot, Sparkles, LoaderCircle, ImageIcon } from "lucide-react";
 
 export default function StudyPage() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -12,6 +12,11 @@ export default function StudyPage() {
   const [topics, setTopics] = useState([]);
   const [showTimetable, setShowTimetable] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [aiSubject, setAiSubject] = useState("");
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [aiStudy, setAiStudy] = useState(null);
 
   const subjects = [
     { name: "Linear Algebra", staff: "Ms.M.M.Shalini" },
@@ -54,6 +59,42 @@ export default function StudyPage() {
     if (res.ok) setTopics(topics.filter(t => t._id !== id));
   };
 
+  const handleGenerateAi = async () => {
+    const nextSubject = aiSubject || selectedSubject || subjects[0]?.name || "";
+    const nextTopic = aiTopic || topic;
+
+    if (!nextSubject || !nextTopic.trim()) {
+      setAiError("Choose a subject and enter a topic first.");
+      return;
+    }
+
+    setAiLoading(true);
+    setAiError("");
+
+    try {
+      const res = await fetch("/api/study/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject: nextSubject, topic: nextTopic.trim() }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.message || "Failed to generate AI study aid");
+      }
+
+      setAiStudy(data.study);
+    } catch (error) {
+      setAiError(error.message || "Failed to generate AI study aid");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const svgImageUrl = aiStudy?.svg
+    ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(aiStudy.svg)}`
+    : "";
+
   const grouped = subjects.map(s => ({ ...s, topics: topics.filter(t => t.subject === s.name) }));
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const timetable = [
@@ -91,11 +132,152 @@ export default function StudyPage() {
           </div>
         </div>
 
+        {/* ── AI Study Assistant ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass rounded-[2.5rem] p-6 md:p-8 ring-1 ring-white/5 shadow-2xl shadow-black/25"
+        >
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+            <div className="max-w-2xl space-y-2">
+              <div className="flex items-center gap-2 text-xs font-black tracking-[0.2em] uppercase text-indigo-300">
+                <Bot size={14} /> OpenRouter AI Tutor
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">Generate a visual study guide</h2>
+              <p className="text-slate-400 text-sm md:text-base">
+                Pick a subject and topic. The AI will create a compact explanation, quick check questions, and an SVG image you can study from.
+              </p>
+            </div>
+            <button
+              onClick={handleGenerateAi}
+              disabled={aiLoading}
+              className="btn-primary h-14 lg:w-auto w-full px-6"
+            >
+              {aiLoading ? <LoaderCircle size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {aiLoading ? "Generating..." : "Generate with AI"}
+            </button>
+          </div>
+
+          <div className="mt-6 grid lg:grid-cols-[1fr_1.2fr] gap-6">
+            <div className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2.5">
+                  <label className="field-label">AI Subject</label>
+                  <select
+                    className="advanced-input h-14 pr-12 appearance-none bg-indigo-500/5"
+                    value={aiSubject}
+                    onChange={e => setAiSubject(e.target.value)}
+                  >
+                    <option value="" className="bg-slate-900 text-slate-400">Select Subject</option>
+                    {subjects.map(s => <option key={s.name} value={s.name} className="bg-slate-900 text-white">{s.name}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-2.5">
+                  <label className="field-label">AI Topic</label>
+                  <input
+                    className="advanced-input h-14"
+                    value={aiTopic}
+                    onChange={e => setAiTopic(e.target.value)}
+                    placeholder="e.g. Matrix inverse rules"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-white/5 bg-white/3 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 mb-2 flex items-center gap-2">
+                  <Sparkles size={12} /> Prompt hint
+                </p>
+                <p className="text-sm text-slate-300">
+                  Use the AI panel when you want a fast explanation and a topic image. It is separate from the manual topic log below.
+                </p>
+              </div>
+
+              {aiError && (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                  {aiError}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-[1.75rem] overflow-hidden border border-white/5 bg-slate-950/40 min-h-80">
+              {aiStudy ? (
+                <div className="grid md:grid-cols-[0.95fr_1.05fr] min-h-80">
+                  <div className="p-4 md:p-5 border-b md:border-b-0 md:border-r border-white/5 space-y-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="section-label">AI Visual</p>
+                        <h3 className="font-black text-white text-lg mt-1 leading-tight">{aiStudy.title || "Study Visual"}</h3>
+                      </div>
+                      <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-400/20 flex items-center justify-center text-indigo-300">
+                        <ImageIcon size={18} />
+                      </div>
+                    </div>
+
+                    {svgImageUrl ? (
+                      <div className="rounded-[1.25rem] overflow-hidden bg-white/5 border border-white/5">
+                        <img src={svgImageUrl} alt={aiStudy.title || "AI generated study visual"} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="rounded-[1.25rem] border border-dashed border-white/10 bg-white/3 min-h-[220px] flex items-center justify-center text-slate-500 text-sm">
+                        AI visual will appear here.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-4 md:p-5 space-y-4">
+                    <div>
+                      <p className="section-label">Explanation</p>
+                      <p className="mt-2 text-slate-200 text-sm leading-7">{aiStudy.summary || "No summary returned."}</p>
+                    </div>
+
+                    <div>
+                      <p className="section-label">Key Points</p>
+                      <div className="mt-3 space-y-2">
+                        {(aiStudy.key_points || []).map((point, index) => (
+                          <div key={index} className="flex gap-3 rounded-2xl bg-white/4 border border-white/5 px-4 py-3 text-sm text-slate-300">
+                            <span className="text-indigo-300 font-black">0{index + 1}</span>
+                            <span>{point}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/15 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.18em] text-emerald-300 font-black">Mnemonic</p>
+                        <p className="text-sm text-emerald-50 mt-2 leading-6">{aiStudy.mnemonic || "No mnemonic returned."}</p>
+                      </div>
+                      <div className="rounded-2xl bg-blue-500/10 border border-blue-500/15 p-4">
+                        <p className="text-[10px] uppercase tracking-[0.18em] text-blue-300 font-black">Quick Check</p>
+                        <div className="mt-2 space-y-2 text-sm text-blue-50/90">
+                          {(aiStudy.quick_check || []).map((item, index) => (
+                            <p key={index}>• {item}</p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="min-h-80 flex flex-col items-center justify-center text-center px-6 py-10">
+                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center text-indigo-300 mb-4">
+                    <Bot size={28} />
+                  </div>
+                  <h3 className="text-white font-black text-lg">No AI study guide yet</h3>
+                  <p className="text-slate-400 text-sm mt-2 max-w-md">
+                    Choose a subject and topic above, then generate a study explanation and visual.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+
         {/* ── Timetable ── */}
         <AnimatePresence>
           {showTimetable && (
             <motion.div key="tt" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="glass rounded-[2rem] overflow-hidden">
+              className="glass rounded-4xl overflow-hidden">
               <div className="px-6 py-4 border-b border-white/5">
                 <p className="font-black text-slate-900 dark:text-white">🗓️ Weekly Timetable</p>
               </div>

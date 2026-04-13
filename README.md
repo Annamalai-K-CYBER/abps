@@ -34,3 +34,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## OpenRouter Study AI
+
+The study page includes an OpenRouter-powered AI tutor that generates an explanation and SVG visual for a subject and topic.
+
+Set these environment variables before using it:
+
+- `OPENROUTER_API_KEY`
+- `OPENROUTER_MODEL` (optional, defaults to `openai/gpt-4o-mini`)
+- `OPENROUTER_SITE_URL` (optional, for OpenRouter attribution)
+- `OPENROUTER_SITE_NAME` (optional, for OpenRouter attribution)

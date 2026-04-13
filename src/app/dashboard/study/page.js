@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, Trash2, Plus, Calendar, BookOpen, X, Bot, Sparkles, LoaderCircle, ImageIcon } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Plus, Calendar, BookOpen, X, Bot, Sparkles, LoaderCircle, ImageIcon, Send, MessageSquare } from "lucide-react";
 
 export default function StudyPage() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -17,6 +17,15 @@ export default function StudyPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [aiStudy, setAiStudy] = useState(null);
+  const [chatMessages, setChatMessages] = useState([
+    {
+      role: "assistant",
+      content: "Ask me anything about the selected subject or topic. I will explain it like a study tutor.",
+    },
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState("");
 
   const subjects = [
     { name: "Linear Algebra", staff: "Ms.M.M.Shalini" },
@@ -94,6 +103,45 @@ export default function StudyPage() {
   const svgImageUrl = aiStudy?.svg
     ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(aiStudy.svg)}`
     : "";
+
+  const handleSendChat = async () => {
+    const message = chatInput.trim();
+    const contextSubject = aiSubject || selectedSubject || subjects[0]?.name || "";
+    const contextTopic = aiTopic || topic || "";
+
+    if (!message) return;
+
+    setChatError("");
+    setChatLoading(true);
+
+    const nextMessages = [...chatMessages, { role: "user", content: message }];
+    setChatMessages(nextMessages);
+    setChatInput("");
+
+    try {
+      const res = await fetch("/api/study/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: contextSubject,
+          topic: contextTopic,
+          messages: nextMessages,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.message || "Failed to get chat reply");
+      }
+
+      setChatMessages(current => [...current, { role: "assistant", content: data.reply }]);
+    } catch (error) {
+      setChatError(error.message || "Failed to get chat reply");
+      setChatMessages(current => [...current, { role: "assistant", content: "I couldn\'t answer that just now. Try again in a moment." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   const grouped = subjects.map(s => ({ ...s, topics: topics.filter(t => t.subject === s.name) }));
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -269,6 +317,107 @@ export default function StudyPage() {
                   </p>
                 </div>
               )}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── AI Chat ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="glass rounded-[2.5rem] p-6 md:p-8 ring-1 ring-white/5 shadow-2xl shadow-black/25"
+        >
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+            <div className="max-w-2xl space-y-2">
+              <div className="flex items-center gap-2 text-xs font-black tracking-[0.2em] uppercase text-cyan-300">
+                <MessageSquare size={14} /> OpenRouter Study Chat
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">Chat with the tutor</h2>
+              <p className="text-slate-400 text-sm md:text-base">
+                Ask follow-up questions about the same subject and topic. The chat keeps the conversation context on the page.
+              </p>
+            </div>
+            <button
+              onClick={() => setChatMessages([{ role: "assistant", content: "Ask me anything about the selected subject or topic. I will explain it like a study tutor." }])}
+              className="glass glass-hover px-5 py-3 rounded-2xl text-sm font-bold text-slate-300"
+            >
+              Reset Chat
+            </button>
+          </div>
+
+          <div className="mt-6 grid lg:grid-cols-[0.75fr_1.25fr] gap-6">
+            <div className="space-y-4">
+              <div className="rounded-3xl border border-white/5 bg-white/3 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500 mb-2">Chat Context</p>
+                <p className="text-sm text-slate-300 leading-6">
+                  Subject: <span className="text-white font-semibold">{aiSubject || selectedSubject || "Not selected"}</span>
+                </p>
+                <p className="text-sm text-slate-300 leading-6 mt-1">
+                  Topic: <span className="text-white font-semibold">{aiTopic || topic || "Not selected"}</span>
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-cyan-500/15 bg-cyan-500/10 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-300 mb-2">Try asking</p>
+                <div className="space-y-2 text-sm text-cyan-50/90">
+                  <p>• Explain this topic in simple terms.</p>
+                  <p>• Give me a short revision note.</p>
+                  <p>• Ask me a quiz question.</p>
+                </div>
+              </div>
+
+              {chatError && (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                  {chatError}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-[1.75rem] border border-white/5 bg-slate-950/40 overflow-hidden flex flex-col min-h-[480px]">
+              <div className="flex-1 p-4 md:p-5 space-y-3 overflow-y-auto max-h-[420px]">
+                {chatMessages.map((message, index) => (
+                  <div
+                    key={index}
+                    className={`max-w-[85%] rounded-3xl px-4 py-3 text-sm leading-6 ${message.role === "assistant"
+                      ? "bg-white/5 border border-white/5 text-slate-200"
+                      : "ml-auto bg-cyan-500/15 border border-cyan-500/20 text-cyan-50"
+                      }`}
+                  >
+                    {message.content}
+                  </div>
+                ))}
+                {chatLoading && (
+                  <div className="max-w-[85%] rounded-3xl px-4 py-3 text-sm leading-6 bg-white/5 border border-white/5 text-slate-400">
+                    Thinking...
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-white/5 p-4 md:p-5">
+                <div className="flex gap-3">
+                  <input
+                    className="advanced-input h-14 flex-1"
+                    value={chatInput}
+                    onChange={e => setChatInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!chatLoading) handleSendChat();
+                      }
+                    }}
+                    placeholder="Ask the study chat..."
+                  />
+                  <button
+                    onClick={handleSendChat}
+                    disabled={chatLoading || !chatInput.trim()}
+                    className="btn-primary h-14 px-5 w-auto"
+                  >
+                    {chatLoading ? <LoaderCircle size={18} className="animate-spin" /> : <Send size={18} />}
+                    {chatLoading ? "Sending" : "Send"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>

@@ -12,6 +12,7 @@ export default function DashboardLayout({ children }) {
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const darkMode = true;
 
   useEffect(() => {
     const handleScroll = () => {

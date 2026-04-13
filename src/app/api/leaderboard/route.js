@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 async function connectDB() {
   if (mongoose.connection.readyState >= 1) return;
   await mongoose.connect(process.env.MONGODB_URI, { dbName: "csbs_sync" });

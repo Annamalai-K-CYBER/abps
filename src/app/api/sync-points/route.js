@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // ─── Inline DB connect (same pattern as login/route.js) ───
 async function connectDB() {
   if (mongoose.connection.readyState >= 1) return;

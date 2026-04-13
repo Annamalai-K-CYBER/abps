@@ -43,5 +43,3 @@ Set these environment variables before using it:
 
 - `OPENROUTER_API_KEY`
 - `OPENROUTER_MODEL` (optional, defaults to `openai/gpt-4o-mini`)
-- `OPENROUTER_SITE_URL` (optional, for OpenRouter attribution)
-- `OPENROUTER_SITE_NAME` (optional, for OpenRouter attribution)

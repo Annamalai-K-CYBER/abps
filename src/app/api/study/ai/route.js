@@ -4,8 +4,6 @@ export const runtime = "nodejs";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
-const OPENROUTER_SITE_URL = process.env.OPENROUTER_SITE_URL || "http://localhost:3000";
-const OPENROUTER_SITE_NAME = process.env.OPENROUTER_SITE_NAME || "CSBS";
 
 function buildPrompt({ subject, topic }) {
   return [
@@ -46,8 +44,6 @@ export async function POST(req) {
       headers: {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": OPENROUTER_SITE_URL,
-        "X-OpenRouter-Title": OPENROUTER_SITE_NAME,
       },
       body: JSON.stringify({
         model: OPENROUTER_MODEL,
